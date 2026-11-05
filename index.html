@@ -586,7 +586,7 @@ main{padding:17px 14px 50px}
    <textarea id="pageHtml" rows="10" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b0e17;color:white;resize:vertical" placeholder="Tempel kode HTML halaman kategori di sini..."></textarea>
   </label>
   <div class="dialog-actions"><button class="btn ghost closeModal">Batal</button><button class="btn" id="savePageBtn">Simpan Kategori</button></div>
-  <p class="notice">Link otomatis: /distendal/slug-kategori/</p>
+  <p class="notice">Link otomatis: /distendang/slug-kategori/</p>
  </div>
 </div>
 
@@ -1151,7 +1151,7 @@ $("saveBtn").addEventListener("click",async()=>{
 /* =====================================
    KATEGORI / HALAMAN DINAMIS
 ===================================== */
-const SITE_BASE = "/distendal/";
+const SITE_BASE = "/distendang/";
 
 function makeSlug(value){
  return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
