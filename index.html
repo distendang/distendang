@@ -1214,12 +1214,22 @@ $("categoryGrid").addEventListener("click",async event=>{
 
 async function openCategoryFromPath(){
  const pathname=decodeURIComponent(location.pathname);
- if(pathname===SITE_BASE||pathname===SITE_BASE.slice(0,-1)){
-  loadItems();loadLatestVideos();loadPages();return;
+
+ // Slug bisa berasal dari URL kategori langsung atau hasil pengalihan 404.html.
+ const querySlug=new URLSearchParams(location.search).get("category");
+ const pathSlug=pathname.startsWith(SITE_BASE)
+  ? pathname.slice(SITE_BASE.length).split("/").filter(Boolean)[0]
+  : "";
+ const slug=querySlug||pathSlug;
+
+ // Jika tidak ada slug, tampilkan halaman utama seperti biasa.
+ if(!slug){
+  loadItems();
+  loadLatestVideos();
+  loadPages();
+  return;
  }
- if(!pathname.startsWith(SITE_BASE)){loadItems();loadLatestVideos();loadPages();return;}
- const slug=pathname.slice(SITE_BASE.length).split("/").filter(Boolean)[0];
- if(!slug){loadItems();loadLatestVideos();loadPages();return;}
+
  const {data,error}=await client.from("pages").select("title,html").eq("slug",slug).maybeSingle();
  if(error||!data){
   document.body.innerHTML='<main style="max-width:650px;margin:12vh auto;padding:24px;text-align:center;color:#f5f7ff;font-family:system-ui"><h1>Kategori tidak ditemukan</h1><p style="color:#929bb0">Halaman belum dibuat atau alamat salah.</p><a href="'+SITE_BASE+'" style="color:#c4b5fd">← Kembali ke DISTENDANG</a></main>';
