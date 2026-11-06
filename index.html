@@ -189,6 +189,8 @@ border:1px solid var(--line);background:#0b0e17;color:white;outline:none}
 .notice{font-size:12px;line-height:1.6;color:var(--muted);margin-top:13px}
 .admin-tools{display:none;gap:8px}
 .admin-tools.show{display:flex}
+.admin-only{display:none}
+.admin-only.show{display:block}
 .delete-btn{
  border:1px solid #7f3038;border-radius:9px;padding:8px 10px;
  background:#3a171d;color:#ffb4bc;font-size:12px;font-weight:800;
@@ -437,7 +439,7 @@ main{padding:17px 14px 50px}
 </section>
 
 <!-- KATEGORI / HALAMAN DINAMIS -->
-<section id="categorySection">
+<section id="categorySection" class="admin-only">
  <div class="section-head">
   <div><h2>Kategori</h2><p>Pilih kategori untuk membuka halaman khusus.</p></div>
   <span class="tag" id="categoryTotal">0 KATEGORI</span>
@@ -579,14 +581,11 @@ main{padding:17px 14px 50px}
 <!-- TAMBAH KATEGORI -->
 <div class="modal" id="pageModal">
  <div class="dialog">
-  <h2>Tambah Kategori / Halaman</h2>
-  <label class="field"><span>Nama kategori</span><input id="pageTitle" placeholder="Contoh: Julian"></label>
-  <label class="field"><span>Slug URL</span><input id="pageSlug" placeholder="contoh: julian"></label>
-  <label class="field"><span>Isi HTML lengkap halaman ini</span>
-   <textarea id="pageHtml" rows="10" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0b0e17;color:white;resize:vertical" placeholder="Tempel kode HTML halaman kategori di sini..."></textarea>
-  </label>
-  <div class="dialog-actions"><button class="btn ghost closeModal">Batal</button><button class="btn" id="savePageBtn">Simpan Kategori</button></div>
-  <p class="notice">Link otomatis: /distendang/slug-kategori/</p>
+  <h2>Tambah Halaman Kategori</h2>
+  <label class="field"><span>Nama kategori / halaman</span><input id="pageTitle" placeholder="Contoh: Julian JJK"></label>
+  <label class="field"><span>Alamat URL (slug)</span><input id="pageSlug" placeholder="contoh: julian-jjk"></label>
+  <div class="dialog-actions"><button class="btn ghost closeModal">Batal</button><button class="btn" id="savePageBtn">Buat Halaman</button></div>
+  <p class="notice">Halaman memakai desain DISTENDANG. Video dan download yang ditambahkan saat membuka halaman ini hanya tampil di halaman tersebut.</p>
  </div>
 </div>
 
@@ -727,6 +726,8 @@ const client = window.supabase.createClient(
 
 const $ = id => document.getElementById(id);
 const grid = $("downloadGrid");
+const SITE_BASE = "/distendang/";
+let activePageSlug = null;
 
 $("year").textContent = new Date().getFullYear();
 
@@ -876,12 +877,12 @@ function updateAdmin(loggedIn){
  const settingsBtn=$("settingsBtn");
  if(adminTools) adminTools.classList.toggle("show",loggedIn);
  if(settingsBtn) settingsBtn.textContent=loggedIn ? "Keluar Admin" : "⚙ Pengaturan";
-
- // Jangan memanggil elemen beranda jika sedang membuka halaman kategori.
+ const categorySection=$("categorySection");
+ if(categorySection) categorySection.classList.toggle("show",loggedIn && !activePageSlug);
  if($("downloadGrid")){
   loadItems();
   loadLatestVideos();
-  if($("categoryGrid")) loadPages();
+  if($("categoryGrid") && loggedIn && !activePageSlug) loadPages();
  }
 }
 
@@ -1043,10 +1044,16 @@ async function loadItems(){
   grid.innerHTML =
     '<div class="empty">Memuat daftar download...</div>';
 
-  const { data, error } = await client
+  let request = client
     .from(TABLE)
-    .select("id,hero_name,skin_name,image_url,download_url,created_at")
+    .select("id,hero_name,skin_name,image_url,download_url,created_at,page_id")
     .order("created_at", { ascending: false });
+
+  request = activePageSlug
+    ? request.eq("page_id", activePageSlug)
+    : request.is("page_id", null);
+
+  const { data, error } = await request;
 
   if(error){
     console.error("Gagal memuat download:", error);
@@ -1122,7 +1129,8 @@ $("saveBtn").addEventListener("click",async()=>{
     skin_name:skin,
     image_url:publicUrl,
     download_url:link,
-    created_by:session.user.id
+    created_by:session.user.id,
+    page_id:activePageSlug
    });
 
   if(insertError) throw insertError;
@@ -1149,97 +1157,145 @@ $("saveBtn").addEventListener("click",async()=>{
 });
 
 /* =====================================
-   KATEGORI / HALAMAN DINAMIS
+   HALAMAN DINAMIS / KATEGORI ADMIN
 ===================================== */
-const SITE_BASE = "/distendang/";
 
 function makeSlug(value){
  return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
   .toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
 }
+
 $("pageTitle").addEventListener("input",()=>{
  if(!$("pageSlug").dataset.edited) $("pageSlug").value=makeSlug($("pageTitle").value);
 });
 $("pageSlug").addEventListener("input",()=>{$("pageSlug").dataset.edited="1";});
 $("addPageBtn").addEventListener("click",()=>{
- $("pageTitle").value="";$("pageSlug").value="";$("pageSlug").dataset.edited="";
- $("pageHtml").value="";openModal("pageModal");
+ $("pageTitle").value="";
+ $("pageSlug").value="";
+ $("pageSlug").dataset.edited="";
+ openModal("pageModal");
 });
 
 async function loadPages(){
  const box=$("categoryGrid");
- const {data,error}=await client.from("pages").select("id,slug,title,created_at").order("created_at",{ascending:false});
- if(error){box.innerHTML='<div class="empty">Gagal memuat kategori. Periksa tabel pages dan kebijakan SELECT.</div>';console.error(error);return;}
- $("categoryTotal").textContent=`${(data||[]).length} KATEGORI`;
- if(!data?.length){box.innerHTML='<div class="empty">Belum ada kategori. Admin bisa menambahkannya melalui Pengaturan.</div>';return;}
+ if(!box || !isAdmin || activePageSlug) return;
+ const {data,error}=await client.from("pages")
+  .select("id,slug,title,created_at")
+  .order("created_at",{ascending:false});
+ if(error){
+  box.innerHTML='<div class="empty">Gagal memuat daftar halaman. Periksa tabel pages dan kebijakan SELECT.</div>';
+  console.error(error);
+  return;
+ }
+ $("categoryTotal").textContent=`${(data||[]).length} HALAMAN`;
+ if(!data?.length){
+  box.innerHTML='<div class="empty">Belum ada halaman. Buat halaman melalui tombol Tambah Kategori.</div>';
+  return;
+ }
  box.innerHTML=data.map(page=>`
   <article class="card" style="height:auto;min-height:120px;max-height:none;grid-template-columns:1fr">
    <div class="card-body">
     <h3 class="hero-name">${escapeHtml(page.title)}</h3>
-    <div class="script-info"><span class="script-label">URL:</span><span class="script-value">/${escapeHtml(page.slug)}/</span></div>
+    <div class="script-info"><span class="script-label">URL:</span><span class="script-value">/distendang/${escapeHtml(page.slug)}/</span></div>
     <div class="card-foot">
-     <a class="download" href="${SITE_BASE}${encodeURIComponent(page.slug)}/">BUKA KATEGORI ↗</a>
-     ${isAdmin?`<button class="delete-btn" type="button" data-delete-page="${escapeHtml(page.id)}">🗑 HAPUS</button>`:""}
+     <a class="download" href="${SITE_BASE}${encodeURIComponent(page.slug)}/">BUKA HALAMAN ↗</a>
+     <button class="delete-btn" type="button" data-delete-page="${escapeHtml(page.id)}">HAPUS HALAMAN</button>
     </div>
    </div>
   </article>`).join("");
 }
 
 $("savePageBtn").addEventListener("click",async()=>{
- const title=$("pageTitle").value.trim(),slug=makeSlug($("pageSlug").value),html=$("pageHtml").value.trim();
+ const title=$("pageTitle").value.trim();
+ const slug=makeSlug($("pageSlug").value);
  const {data:{session}}=await client.auth.getSession();
- if(!session)return alert("Login admin terlebih dahulu.");
- if(!title||!slug||!html)return alert("Lengkapi nama, slug, dan isi HTML.");
- if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))return alert("Slug hanya boleh berisi huruf kecil, angka, dan tanda hubung.");
- const btn=$("savePageBtn");btn.disabled=true;btn.textContent="Menyimpan...";
+ if(!session) return alert("Login admin terlebih dahulu.");
+ if(!title || !slug) return alert("Isi nama halaman dan alamat URL.");
+ if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
+  return alert("Alamat URL hanya boleh berisi huruf kecil, angka, dan tanda hubung.");
+ const btn=$("savePageBtn");
+ btn.disabled=true;
+ btn.textContent="Membuat halaman...";
  try{
-  const {error}=await client.from("pages").insert({slug,title,html});
-  if(error)throw error;
-  closeModals();await loadPages();
-  alert("Kategori berhasil dibuat! Link: "+SITE_BASE+slug+"/");
- }catch(error){console.error(error);alert("Gagal menyimpan kategori: "+error.message);}
- finally{btn.disabled=false;btn.textContent="Simpan Kategori";}
+  const {error}=await client.from("pages").insert({slug,title,html:""});
+  if(error) throw error;
+  closeModals();
+  await loadPages();
+  alert("Halaman berhasil dibuat. Link: "+SITE_BASE+slug+"/");
+ }catch(error){
+  console.error(error);
+  alert("Gagal membuat halaman: "+error.message);
+ }finally{
+  btn.disabled=false;
+  btn.textContent="Buat Halaman";
+ }
 });
 
 $("categoryGrid").addEventListener("click",async event=>{
- const btn=event.target.closest("[data-delete-page]");if(!btn)return;
+ const btn=event.target.closest("[data-delete-page]");
+ if(!btn) return;
  const {data:{session}}=await client.auth.getSession();
- if(!session)return alert("Login admin terlebih dahulu.");
- if(!confirm("Yakin ingin menghapus kategori ini?"))return;
- btn.disabled=true;btn.textContent="Menghapus...";
+ if(!session) return alert("Login admin terlebih dahulu.");
+ if(!confirm("Hapus halaman ini dari daftar? Data download dan video yang sudah tersimpan tidak ikut dihapus.")) return;
+ btn.disabled=true;
+ btn.textContent="Menghapus...";
  const {error}=await client.from("pages").delete().eq("id",btn.dataset.deletePage);
- if(error){alert("Gagal menghapus kategori: "+error.message);btn.disabled=false;btn.textContent="🗑 HAPUS";return;}
+ if(error){
+  alert("Gagal menghapus halaman: "+error.message);
+  btn.disabled=false;
+  btn.textContent="HAPUS HALAMAN";
+  return;
+ }
  await loadPages();
 });
 
 async function openCategoryFromPath(){
- const pathname=decodeURIComponent(location.pathname);
+ const url=new URL(location.href);
+ const pathname=decodeURIComponent(url.pathname);
+ let slug=url.searchParams.get("page") || "";
+ if(!slug && pathname.startsWith(SITE_BASE)){
+  slug=pathname.slice(SITE_BASE.length).split("/").filter(Boolean)[0] || "";
+ }
+ activePageSlug=slug ? makeSlug(slug) : null;
 
- // Slug bisa berasal dari URL kategori langsung atau hasil pengalihan 404.html.
- const querySlug=new URLSearchParams(location.search).get("category");
- const pathSlug=pathname.startsWith(SITE_BASE)
-  ? pathname.slice(SITE_BASE.length).split("/").filter(Boolean)[0]
-  : "";
- const slug=querySlug||pathSlug;
-
- // Jika tidak ada slug, tampilkan halaman utama seperti biasa.
- if(!slug){
-  loadItems();
-  loadLatestVideos();
-  loadPages();
+ if(activePageSlug){
+  const cleanPath=SITE_BASE+encodeURIComponent(activePageSlug)+"/";
+  if(pathname===SITE_BASE || pathname===SITE_BASE.slice(0,-1)){
+   history.replaceState(null,"",cleanPath);
+  }
+  const {data,error}=await client.from("pages")
+   .select("title").eq("slug",activePageSlug).maybeSingle();
+  if(error || !data){
+   document.title="Halaman tidak ditemukan — DISTENDANG";
+   $("categorySection")?.classList.remove("show");
+   $("downloadGrid").innerHTML='<div class="empty">Halaman tidak ditemukan atau belum dibuat.</div>';
+   $("videoGrid").innerHTML='<div class="video-loading">Halaman tidak ditemukan.</div>';
+   const heading=$(".section-head h2");
+   if(heading) heading.textContent="Halaman tidak ditemukan";
+   return;
+  }
+  document.title=data.title+" — DISTENDANG";
+  const hero=$(".hero");
+  if(hero) hero.style.display="none";
+  const categorySection=$("categorySection");
+  if(categorySection) categorySection.style.display="none";
+  const heading=$(".section-head h2");
+  if(heading) heading.textContent=data.title;
+  const description=$(".section-head p");
+  if(description) description.textContent="Koleksi download dan video khusus "+data.title+".";
+  await loadItems();
+  await loadLatestVideos();
   return;
  }
 
- const {data,error}=await client.from("pages").select("title,html").eq("slug",slug).maybeSingle();
- if(error||!data){
-  document.body.innerHTML='<main style="max-width:650px;margin:12vh auto;padding:24px;text-align:center;color:#f5f7ff;font-family:system-ui"><h1>Kategori tidak ditemukan</h1><p style="color:#929bb0">Halaman belum dibuat atau alamat salah.</p><a href="'+SITE_BASE+'" style="color:#c4b5fd">← Kembali ke DISTENDANG</a></main>';
-  return;
- }
- document.title=data.title+" — DISTENDANG";
- document.body.innerHTML=`<div style="position:fixed;z-index:99999;top:12px;left:12px"><a href="${SITE_BASE}" style="display:inline-block;padding:11px 16px;border-radius:12px;background:#8b5cf6;color:#fff;text-decoration:none;font:700 14px system-ui;box-shadow:0 5px 20px #0008">← Kembali ke DISTENDANG</a></div><iframe id="categoryFrame" title="${escapeHtml(data.title)}" style="display:block;width:100%;height:100vh;border:0;background:#090b12"></iframe>`;
- const frame=document.getElementById("categoryFrame");
- frame.setAttribute("sandbox","allow-scripts allow-forms allow-popups allow-downloads");
- frame.srcdoc=data.html;
+ const hero=$(".hero");
+ if(hero) hero.style.display="";
+ const categorySection=$("categorySection");
+ if(categorySection) categorySection.style.display="";
+ await loadItems();
+ await loadLatestVideos();
+ const {data:{session}}=await client.auth.getSession();
+ if(session) await loadPages();
 }
 
 /* =====================================
@@ -1352,7 +1408,8 @@ $("saveVideoBtn").addEventListener("click", async () => {
       .insert({
         youtube_id: youtubeId,
         video_url: url,
-        title: title
+        title: title,
+        page_id: activePageSlug
       });
 
     if (error) throw error;
@@ -1379,11 +1436,16 @@ $("saveVideoBtn").addEventListener("click", async () => {
 async function loadLatestVideos() {
   const videoGrid = $("videoGrid");
 
-  const { data, error } = await client
+  let request = client
     .from("youtube_videos")
     .select("*")
-    .order("created_at", { ascending: false })
-    .limit(3);
+    .order("created_at", { ascending: false });
+
+  request = activePageSlug
+    ? request.eq("page_id", activePageSlug)
+    : request.is("page_id", null);
+
+  const { data, error } = await request.limit(3);
 
   if (error) {
     videoGrid.innerHTML =
