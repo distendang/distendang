@@ -1,18 +1,31 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>MemuaDISTENDANG...</title></head>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#090b12">
+  <title>Memuat DISTENDANG...</title>
+</head>
 <body style="margin:0;background:#090b12;color:#f5f7ff;font-family:system-ui;padding:24px">
-<p>Memuat halaman DISTENDANG...</p>
-<script>
-(async()=>{
- const base="/distendal/";
- try{
-  const response=await fetch(base+"index.html",{cache:"no-store"});
-  if(!response.ok)throw new Error("index.html tidak ditemukan");
-  let html=await response.text();
-  html=html.replace("<head>","<head><base href=\""+base+"\">");
-  document.open();document.write(html);document.close();
- }catch(error){
-  document.body.innerHTML="<h2>Halaman gagal dimuat</h2><p>Pastikan file index.html sudah ada di repository DISTENDAL.</p>";
- }
-})();
-</script></body></html>
+  <p>Memuat halaman kategori...</p>
+
+  <script>
+    (function () {
+      const base = "/distendang/";
+      const path = decodeURIComponent(window.location.pathname);
+
+      const slug = path.startsWith(base)
+        ? path.slice(base.length).split("/").filter(Boolean)[0]
+        : "";
+
+      if (slug) {
+        window.location.replace(
+          base + "?category=" + encodeURIComponent(slug)
+        );
+      } else {
+        window.location.replace(base);
+      }
+    })();
+  </script>
+</body>
+</html>
