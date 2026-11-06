@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Membuka halaman DISTENDANG...</title>
+</head>
+<body style="margin:0;background:#090b12;color:#f5f7ff;font-family:system-ui;display:grid;place-items:center;min-height:100vh">
+<p>Membuka halaman...</p>
+<script>
+(function(){
+  var base="/distendang/";
+  var path=decodeURIComponent(location.pathname);
+  var slug=path.startsWith(base) ? path.slice(base.length).split("/").filter(Boolean)[0] : "";
+  if(slug){
+    location.replace(base+"?page="+encodeURIComponent(slug));
+  }else{
+    location.replace(base);
+  }
+})();
+</script>
+</body>
+</html>
