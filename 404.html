@@ -1,42 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>404 - Halaman Tidak Ditemukan</title>
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background:#090b12;
-  color:#f5f7ff;
-  font-family:system-ui;
-  min-height:100vh;
-  display:grid;
-  place-items:center;
-  text-align:center;
-  padding:20px;
-}
-h1{font-size:65px;margin:0;color:#ff5252}
-p{color:#aab0c0}
-a{
-  display:inline-block;
-  margin-top:15px;
-  padding:12px 22px;
-  background:#7657ff;
-  color:white;
-  text-decoration:none;
-  border-radius:10px;
-}
-</style>
+<title>Membuka halaman DISTENDANG...</title>
 </head>
-<body>
-<div>
-  <h1>404</h1>
-  <h2>Halaman Tidak Ditemukan</h2>
-  <p>Maaf, halaman DISTENDANG yang kamu cari tidak tersedia.</p>
-  <a href="/distendang/">Kembali ke Beranda</a>
-</div>
+<body style="margin:0;background:#090b12;color:#f5f7ff;font-family:system-ui;display:grid;place-items:center;min-height:100vh">
+<p>Membuka halaman...</p>
+<script>
+(function(){
+  var base="/distendang/";
+  var path=decodeURIComponent(location.pathname);
+  var slug=path.startsWith(base) ? path.slice(base.length).split("/").filter(Boolean)[0] : "";
+  if(slug){
+    location.replace(base+"?page="+encodeURIComponent(slug));
+  }else{
+    location.replace(base);
+  }
+})();
+</script>
 </body>
 </html>
