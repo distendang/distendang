@@ -1,0 +1,1580 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b12">
+<title>DISTENDANG — Download Script</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+--bg:#090b12;--panel:#111522;--panel2:#171d2c;
+--text:#f5f7ff;--muted:#929bb0;
+--accent:#8b5cf6;--accent2:#4f46e5;--line:#252c3d
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);
+font-family:Inter,system-ui,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer}
+
+.card-foot{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;margin-top:5px}
+.card-foot .skin{font-size:10px;white-space:nowrap;margin:0}
+.card-foot .download{font-size:13px;padding:10px 16px;white-space:nowrap;flex:0 0 auto;width:auto;text-align:center;margin-right:auto}
+.card-foot .delete-btn{font-size:11px;padding:10px 11px;white-space:nowrap}
+header{
+height:70px;display:flex;align-items:center;
+justify-content:space-between;padding:0 5%;
+border-bottom:1px solid var(--line);
+background:#090b12ef;position:sticky;top:0;
+z-index:10;backdrop-filter:blur(14px)
+}
+.logo{font-weight:900;letter-spacing:1px;font-size:20px}
+.logo span{color:#a78bfa}
+.header-right{display:flex;gap:10px;align-items:center}
+.btn{
+border:0;border-radius:12px;padding:11px 16px;
+background:linear-gradient(135deg,var(--accent),var(--accent2));
+color:white;font-weight:750
+}
+.btn.ghost{background:var(--panel2);border:1px solid var(--line)}
+main{max-width:1180px;margin:auto;padding:26px 22px 70px}
+
+.hero{position:relative;overflow:hidden;border-radius:22px;
+background:#151a29;box-shadow:0 18px 55px #0007}
+.slides{display:flex;transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.slide{flex:0 0 100%;aspect-ratio:16/6;min-height:190px;position:relative}
+.slide img{width:100%;height:100%;object-fit:cover;display:block}
+.slide:after{
+content:"";position:absolute;inset:0;
+background:linear-gradient(90deg,#080a12b8,transparent 75%),
+linear-gradient(0deg,#080a1270,transparent 55%)
+}
+.hero-copy{position:absolute;z-index:2;left:5%;bottom:16%;max-width:470px}
+.eyebrow{color:#c4b5fd;font-size:12px;font-weight:800;letter-spacing:2px}
+.hero-copy h1{font-size:clamp(24px,4vw,46px);margin:8px 0}
+.hero-copy p{color:#e0e3ed;margin:0;font-size:14px}
+.dots{position:absolute;z-index:3;bottom:15px;left:50%;
+transform:translateX(-50%);display:flex;gap:9px}
+.dot{width:7px;height:7px;border:0;border-radius:20px;
+background:#ffffff80;padding:0;transition:.25s}
+.dot.active{width:23px;background:white}
+
+.section-head{display:flex;align-items:end;justify-content:space-between;
+margin:34px 0 17px;gap:12px}
+.section-head h2{font-size:24px;margin:0}
+.section-head p{color:var(--muted);margin:5px 0 0;font-size:13px}
+
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);
+border-radius:17px;overflow:hidden;transition:.25s;
+display:grid;grid-template-columns:44% minmax(0,1fr);align-items:stretch;height:190px;max-height:190px}
+.card:hover{transform:translateY(-4px);border-color:#6554b8;
+box-shadow:0 12px 35px #0005}
+.card-img{width:100%;height:100%;min-height:0;aspect-ratio:auto;
+object-fit:cover;display:block;background:var(--panel2)}
+.card-body{padding:12px;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:9px}
+.tag{display:inline-block;background:#8b5cf622;color:#c4b5fd;
+border:1px solid #8b5cf644;border-radius:7px;
+padding:4px 8px;font-size:10px;font-weight:800}
+.card h3{font-size:17px;margin:10px 0 4px}
+.hero-name{
+ display:flex;align-self:center;align-items:center;justify-content:center;
+ width:88%;min-height:38px;margin:0;padding:6px 10px;border-radius:24px;
+ background:linear-gradient(135deg,#8b5cf6,#5b35b5);
+ border:1px solid #b9a0ff;color:#fff;
+ font-size:14px!important;font-weight:900;letter-spacing:1px;text-align:center;
+ box-shadow:0 4px 14px #8b5cf633;
+}
+.skin{font-size:13px;color:var(--muted);margin:0 0 14px}
+.script-info{
+ display:flex;flex-direction:row;align-items:center;justify-content:center;
+ gap:5px;margin:0;padding:9px 8px;min-height:42px;
+ border:1px solid #7658c9;border-radius:12px;
+ background:linear-gradient(135deg,#7658c926,#17152a);
+}
+.script-label{
+ display:inline-flex;align-items:center;justify-content:center;
+ padding:0;border-radius:0;background:transparent;color:#c4b5fd;
+ font-size:11px;font-weight:900;letter-spacing:1px;flex:0 0 auto;
+}
+.visit-count{
+ display:inline-flex;align-items:center;gap:6px;
+ margin-top:8px;padding:6px 10px;border-radius:8px;
+ background:#20283a;border:1px solid #39445c;
+ color:#d9d5e8;font-size:12px;font-weight:700;
+}
+.script-value{
+ color:#f3f0ff;font-size:11px;font-weight:800;
+ line-height:1.25;overflow-wrap:anywhere;min-width:0;
+}
+.card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.download{font-size:12px;padding:9px 13px;text-decoration:none;
+display:inline-block;border-radius:9px;background:#8b5cf6;
+color:white;font-weight:800}
+.empty{padding:35px;text-align:center;color:var(--muted);
+background:var(--panel);border:1px dashed var(--line);
+border-radius:16px;grid-column:1/-1}
+
+/* SUPPORT ORDER */
+.support-order{
+margin-top:38px;padding:25px 20px;border-radius:22px;
+border:1px solid #7658c9;
+background:radial-gradient(ellipse at 15% 0%,#8b5cf633,transparent 60%),
+linear-gradient(135deg,#17152a,#111522);
+box-shadow:0 15px 45px #0005
+}
+.so-heading{text-align:center;margin-bottom:20px}
+.so-heading h2{font-size:clamp(24px,4vw,32px);margin:8px 0}
+.so-heading p{font-size:13px;color:var(--muted)}
+.so-actions{display:grid;grid-template-columns:1fr 1fr;
+gap:13px;max-width:650px;margin:auto}
+.so-btn{
+padding:18px 12px;border-radius:15px;border:1px solid #ffffff25;
+color:white;font-weight:900;font-size:15px;transition:.25s
+}
+.so-btn:hover{transform:translateY(-3px);filter:brightness(1.15)}
+.so-btn.support{background:linear-gradient(135deg,#16885a,#0d6243)}
+.so-btn.order{background:linear-gradient(135deg,#7651db,#4f46e5)}
+.so-credit{text-align:center;color:var(--muted);
+font-size:11px;line-height:1.8;margin-top:20px}
+.tutorial-card{margin:14px auto 0;max-width:650px;padding:17px;border:1px solid #7658c9;border-radius:16px;background:linear-gradient(135deg,#20183a,#111522);text-align:center}
+.tutorial-btn{display:block;width:100%;padding:15px 12px;border-radius:12px;color:#fff;text-decoration:none;font-weight:900;background:linear-gradient(135deg,#8b5cf6,#4f46e5);border:1px solid #b9a0ff}
+
+/* YOUTUBE */
+.youtube-section{margin-top:40px}
+.youtube-head{display:flex;align-items:end;justify-content:space-between;
+gap:12px;margin-bottom:17px}
+.youtube-head h2{font-size:24px;margin:0}
+.youtube-head p{font-size:13px;color:var(--muted);margin:5px 0 0}
+.youtube-link{color:#ff7777;text-decoration:none;
+font-weight:800;font-size:12px;white-space:nowrap}
+.video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.video-card:nth-child(3){grid-column:1/-1;width:min(100%,520px);justify-self:center}
+.video-card{background:var(--panel);border:1px solid var(--line);
+border-radius:15px;overflow:hidden;text-decoration:none;color:white;
+transition:.2s}
+.video-card:hover{transform:translateY(-3px);border-color:#e44}
+.video-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.video-info{padding:12px}
+.video-title{font-size:14px;font-weight:750;line-height:1.5;
+display:-webkit-box;-webkit-line-clamp:2;
+-webkit-box-orient:vertical;overflow:hidden}
+.video-date{font-size:11px;color:var(--muted);margin-top:7px}
+.video-loading{grid-column:1/-1;padding:25px;text-align:center;
+color:var(--muted);border:1px dashed var(--line);border-radius:15px}
+
+/* FOOTER */
+footer{border-top:1px solid var(--line);padding:25px;
+text-align:center;color:var(--muted);font-size:12px}
+
+/* LOGIN */
+.modal{position:fixed;inset:0;background:#000b;z-index:30;
+display:none;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.dialog{width:min(520px,100%);max-height:90vh;overflow:auto;
+background:var(--panel);border:1px solid var(--line);
+border-radius:19px;padding:22px}
+.dialog h2{margin:0 0 17px}
+.field{display:block;margin:13px 0}
+.field span{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}
+.field input{width:100%;padding:12px;border-radius:10px;
+border:1px solid var(--line);background:#0b0e17;color:white;outline:none}
+.field input:focus{border-color:var(--accent)}
+.dialog-actions{display:flex;gap:9px;margin-top:18px}
+.dialog-actions button{flex:1}
+.notice{font-size:12px;line-height:1.6;color:var(--muted);margin-top:13px}
+.admin-tools{display:none;gap:8px}
+.admin-tools.show{display:flex}
+.admin-only{display:none}
+.admin-only.show{display:block}
+.delete-btn{
+ border:1px solid #7f3038;border-radius:9px;padding:8px 10px;
+ background:#3a171d;color:#ffb4bc;font-size:12px;font-weight:800;
+ display:inline-flex;align-items:center;justify-content:center;
+ cursor:pointer;white-space:nowrap
+}
+.delete-btn:hover{background:#64202a}
+.card-foot{flex-wrap:wrap}
+.card-admin-actions{display:flex;justify-content:flex-end;margin-top:10px}
+
+/* BOTTOM POPUP */
+.sheet-overlay{position:fixed;inset:0;background:#000b;z-index:50;
+opacity:0;visibility:hidden;transition:.25s}
+.sheet-overlay.show{opacity:1;visibility:visible}
+.bottom-sheet{
+position:fixed;z-index:51;left:50%;bottom:0;
+transform:translate(-50%,105%);width:min(520px,100%);
+max-height:85vh;overflow:auto;background:#151a29;
+border:1px solid #343b50;border-bottom:0;
+border-radius:23px 23px 0 0;padding:12px 22px 25px;
+box-shadow:0 -15px 55px #0009;
+transition:transform .34s cubic-bezier(.2,.8,.2,1)
+}
+.bottom-sheet.show{transform:translate(-50%,0)}
+.sheet-handle{width:43px;height:5px;border-radius:9px;
+background:#596176;margin:0 auto 17px}
+.sheet-close{position:absolute;right:17px;top:14px;
+border:1px solid var(--line);background:#202638;
+color:white;border-radius:9px;padding:6px 10px}
+.sheet-title{text-align:center;font-size:23px;margin:0 35px 8px}
+.sheet-sub{text-align:center;color:#aeb6c9;font-size:13px;
+line-height:1.7;margin:0 auto 16px;max-width:420px}
+.qris{width:min(100%,330px);max-height:330px;object-fit:contain;
+display:block;margin:12px auto;background:white;
+border-radius:13px;padding:7px}
+.sheet-quote{text-align:center;color:#e5ddff;font-size:13px;
+line-height:1.8;margin:15px auto 12px;max-width:420px}
+.sheet-credit{text-align:center;color:#929bb0;font-size:11px;
+line-height:1.9;border-top:1px solid var(--line);
+padding-top:13px;margin-top:13px}
+.sheet-link{display:block;text-align:center;text-decoration:none;
+border-radius:11px;padding:13px;margin:12px auto 0;
+max-width:330px;color:white;font-weight:850}
+.sheet-link.saweria{background:#8b5cf6}
+.sheet-link.instagram{background:linear-gradient(110deg,#8b5cf6,#e04482,#f59e0b)}
+
+/* MUSIC */
+.music-hint{position:fixed;right:14px;bottom:14px;z-index:12;
+background:#171d2c;border:1px solid #39324f;color:white;
+border-radius:30px;padding:11px 15px;font-size:12px;
+box-shadow:0 5px 20px #0008;display:none}
+.music-hint.show{display:block}
+
+@media(max-width:800px){
+.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.slide{aspect-ratio:16/8}
+.hero-copy{bottom:19%}
+.video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:540px){
+header{height:62px;padding:0 15px}
+.logo{font-size:17px}
+main{padding:17px 14px 50px}
+.slide{aspect-ratio:16/10;min-height:190px}
+.hero-copy{left:6%;bottom:21%;max-width:80%}
+.hero-copy p{font-size:12px}
+.grid{grid-template-columns:1fr;gap:12px}
+.card{grid-template-columns:40% minmax(0,1fr);height:170px;max-height:170px}
+.card-img{min-height:0}
+.card-body{padding:8px;gap:7px}
+.card h3{font-size:14px}
+.skin{font-size:11px}
+.hero-name{width:88%;min-height:32px;font-size:12px!important;padding:5px 7px}
+.script-info{min-height:36px;padding:7px 5px;gap:4px;margin:0}
+.script-label,.script-value{font-size:9px}
+.visit-count{font-size:10px;padding:5px 7px}
+.card-foot{flex-wrap:nowrap;justify-content:flex-start;gap:5px}
+.card-foot .download{font-size:11px;padding:9px 12px;flex:0 0 auto;width:auto;margin-right:auto}
+.card-foot .delete-btn{font-size:9px;padding:8px 6px}
+.site-visitor-wrap{padding:8px 14px 0}
+.site-visitor{font-size:11px}
+.download{font-size:11px;padding:8px 9px}
+.section-head h2,.youtube-head h2{font-size:20px}
+.btn{padding:9px 11px;font-size:12px}
+.support-order{padding:19px 13px}
+.so-actions{gap:9px}
+.so-btn{font-size:12px;padding:16px 7px}
+.video-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.video-info{padding:10px}
+.video-title{font-size:12px}
+.youtube-head{align-items:center}
+.bottom-sheet{padding-left:17px;padding-right:17px}
+.qris{max-height:290px}
+}
+@media(max-width:360px){
+.so-actions{grid-template-columns:1fr}
+}
+
+/* PERINGATAN AWAL DAN CROP FOTO */
+.warning-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:#000}
+.warning-modal.hidden{display:none}
+.warning-card{width:min(430px,100%);padding:24px 20px;border-radius:20px;background:#080808;border:1px solid #ff3434;box-shadow:0 18px 55px #000b;text-align:center}
+.warning-card h2{margin:0 0 13px;color:#ff3434;font-size:20px}
+.warning-card p{margin:0;color:#ff4b4b;font-size:14px;line-height:1.75;font-weight:800}
+.warning-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+.warning-actions button{padding:13px 10px;border:0;border-radius:11px;font-weight:900;color:#fff}
+#warningOkay{background:#16885a}#warningBack{background:#9d2630}
+.crop-workspace{background:#080b13;border:1px solid var(--line);border-radius:12px;padding:10px;overflow:hidden}
+#cropCanvas{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#050505;border-radius:8px;touch-action:none}
+.crop-controls{display:flex;align-items:center;gap:12px;margin-top:12px}
+.crop-controls input{flex:1;min-width:0}
+.crop-preview{display:none;width:100%;max-height:120px;object-fit:contain;margin-top:10px;border-radius:9px;border:1px solid var(--line)}
+
+/* PENYESUAIAN LIST SCRIPT: SATU KARTU PER BARIS + GARIS PEMISAH */
+.grid{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) !important;
+  gap:16px !important;
+}
+.card{
+  width:100%;
+  min-width:0;
+  border:1px solid #343d55 !important;
+  border-bottom:2px solid #8b5cf6 !important;
+  border-radius:15px;
+  height:180px;
+  max-height:180px;
+  grid-template-columns:40% minmax(0,1fr);
+}
+.card-foot{
+  display:flex;
+  justify-content:center !important;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:4px;
+}
+.card-foot .download{
+  margin:0 !important;
+  flex:0 1 auto !important;
+  min-width:125px;
+  text-align:center;
+  padding:10px 20px;
+}
+.card-foot .delete-btn{
+  flex:0 0 auto;
+}
+@media(max-width:540px){
+  .grid{grid-template-columns:minmax(0,1fr) !important;gap:14px !important}
+  .card{
+    grid-template-columns:39% minmax(0,1fr);
+    height:165px;
+    max-height:165px;
+  }
+  .card-body{padding:8px;gap:6px}
+  .card-foot{justify-content:center !important;gap:7px}
+  .card-foot .download{
+    min-width:112px;
+    padding:9px 13px;
+    font-size:11px;
+  }
+}
+
+
+/* HALAMAN 404 FULLSCREEN */
+#notFoundPage{min-height:100vh;width:100%;padding:24px;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,#241747 0%,#090b12 58%);}
+#notFoundPage[hidden]{display:none!important}
+.notfound-card{width:min(520px,100%);padding:34px 25px;text-align:center;background:#111522;border:1px solid #343d55;border-radius:22px;box-shadow:0 20px 70px #0009}
+.notfound-code{font-size:clamp(64px,16vw,100px);line-height:1;font-weight:950;letter-spacing:-5px;color:#a78bfa;margin:0}
+.notfound-card h1{font-size:23px;margin:15px 0 8px}
+.notfound-card p{color:#aeb6c9;font-size:14px;line-height:1.7;margin:0 0 22px}
+.notfound-home{display:inline-flex;justify-content:center;align-items:center;padding:12px 20px;border-radius:11px;text-decoration:none;color:#fff;font-weight:850;background:linear-gradient(135deg,#8b5cf6,#4f46e5)}
+
+</style>
+</head>
+
+<body>
+<main id="notFoundPage" hidden>
+ <div class="notfound-card">
+  <p class="notfound-code">404</p>
+  <h1>Halaman Tidak Ditemukan</h1>
+  <p>Maaf, halaman DISTENDANG yang kamu cari belum dibuat atau alamatnya salah.</p>
+  <a class="notfound-home" href="/distendang/">KEMBALI KE BERANDA</a>
+ </div>
+</main>
+<div class="warning-modal" id="warningModal">
+ <div class="warning-card">
+  <h2>PERINGATAN</h2>
+  <p>Script ini tidak bisa dipasang di iOS. Terlalu banyak memasang script bisa mengakibatkan terkena ban. Subscribe YouTube DISTENDANG.</p>
+  <div class="warning-actions"><button type="button" id="warningOkay">OKE</button><button type="button" id="warningBack">KEMBALI</button></div>
+ </div>
+</div>
+
+<header>
+  <div class="logo">DIS<span>TENDANG</span></div>
+
+  <div class="header-right">
+
+    <div class="admin-tools" id="adminTools">
+      <button class="btn ghost" id="addVideoBtn">
+        ▶ Tambah Video
+      </button>
+
+      <button class="btn ghost" id="addScriptBtn">
+        ＋ Tambah Script
+      </button>
+      <button class="btn ghost" id="addPageBtn">
+        ＋ Tambah Kategori
+      </button>
+    </div>
+
+    <a class="btn ghost" id="addBtn" href="https://youtube.com/@distendang?si=XWFelgK8Y1s0vEb2" target="_blank" rel="noopener noreferrer" style="text-decoration:none">
+      SUBSCRIBE
+    </a>
+
+    <button class="btn ghost" id="settingsBtn">
+      ⚙ Pengaturan
+    </button>
+
+  </div>
+</header>
+
+
+<main>
+
+<!-- BANNER ASLI -->
+<section class="hero">
+ <div class="slides" id="slides">
+
+  <div class="slide">
+   <img src="https://xnlrmcpkekvphvdnldnf.supabase.co/storage/v1/object/public/products/cover-12-1024x576.webp" alt="Banner 1">
+   <div class="hero-copy">
+    <div class="eyebrow">DISTENDANG DOWNLOAD CENTER</div>
+    <h1>Download Script Favoritmu</h1>
+    <p>Kumpulan script dan item pilihan dalam satu tempat.</p>
+   </div>
+  </div>
+
+  <div class="slide">
+   <img src="https://xnlrmcpkekvphvdnldnf.supabase.co/storage/v1/object/public/products/9bc242debaf8bac1f2426dd1e04729f1.jpg" alt="Banner 2">
+   <div class="hero-copy">
+    <div class="eyebrow">EXPLORE COLLECTION</div>
+    <h1>Temukan Koleksi Terbaru</h1>
+    <p>Pilih koleksi yang kamu cari dan buka link download.</p>
+   </div>
+  </div>
+
+  <div class="slide">
+   <img src="https://xnlrmcpkekvphvdnldnf.supabase.co/storage/v1/object/public/products/wp5314779.jpg" alt="Banner 3">
+   <div class="hero-copy">
+    <div class="eyebrow">NEW CONTENT</div>
+    <h1>Update Script Terbaru</h1>
+    <p>Konten baru akan ditampilkan di halaman ini.</p>
+   </div>
+  </div>
+
+ </div>
+
+ <div class="dots">
+  <button class="dot active" aria-label="Slide 1"></button>
+  <button class="dot" aria-label="Slide 2"></button>
+  <button class="dot" aria-label="Slide 3"></button>
+ </div>
+</section>
+
+<!-- KATEGORI / HALAMAN DINAMIS -->
+<section id="categorySection" class="admin-only">
+ <div class="section-head">
+  <div><h2>Kategori</h2><p>Pilih kategori untuk membuka halaman khusus.</p></div>
+  <span class="tag" id="categoryTotal">0 KATEGORI</span>
+ </div>
+ <div class="grid" id="categoryGrid"><div class="empty">Memuat kategori...</div></div>
+</section>
+
+<!-- DOWNLOAD -->
+<div class="section-head">
+ <div>
+  <h2>Download Script</h2>
+  <p>Pilih hero dan skin yang ingin kamu download.</p>
+ </div>
+ <span class="tag" id="totalTag">0 SCRIPT</span>
+</div>
+
+<section class="grid" id="downloadGrid">
+ <div class="empty">Memuat daftar download...</div>
+</section>
+
+<!-- SUPPORT DAN ORDER -->
+<section class="support-order">
+ <div class="so-heading">
+  <div class="eyebrow">SUPPORT • ORDER • APPRECIATION</div>
+  <h2>DISST SUP / ORDER</h2>
+  <p>Dukunganmu membantu kami terus berkarya.
+  Butuh script khusus? Kami siap membantu.</p>
+ </div>
+
+ <div class="so-actions">
+  <button class="so-btn support" id="openSupport">
+   ♡ &nbsp; SUPPORT KAMI
+  </button>
+  <button class="so-btn order" id="openOrder">
+   ✦ &nbsp; ORDER SCRIPT
+  </button>
+ </div>
+
+ <div class="so-credit">
+  Website &amp; content by <strong>DISTENDANG</strong><br>
+  © <span class="yearNow"></span> DISTENDANG · Dibuat dengan sepenuh hati
+ </div>
+</section>
+
+<section class="tutorial-card">
+ <a class="tutorial-btn" href="https://youtu.be/ZbQKprilCTg?si=ktyZdYzvjdr2ebjR" target="_blank" rel="noopener noreferrer">▶ TUTORIAL MEMASANG SCRIPT</a>
+</section>
+
+<!-- VIDEO PALING BAWAH -->
+<section class="youtube-section">
+ <div class="youtube-head">
+  <div>
+   <h2>VIDEO TERBARU DISTENDANG</h2>
+   <p>Video terbaru dari channel YouTube resmi DISTENDANG.</p>
+  </div>
+  <a class="youtube-link"
+   href="https://youtube.com/@distendang?si=XWFelgK8Y1s0vEb2"
+   target="_blank" rel="noopener">
+   BUKA CHANNEL ↗
+  </a>
+ </div>
+
+ <div class="video-grid" id="videoGrid">
+  <div class="video-loading">Memuat video terbaru DISTENDANG...</div>
+ </div>
+</section>
+
+</main>
+
+<footer>
+ © <span id="year"></span> DISTENDANG · Download Script · Created by DISTENDANG
+</footer>
+
+<!-- LOGIN ADMIN -->
+<div class="modal" id="loginModal">
+ <div class="dialog">
+  <h2>Login Admin</h2>
+
+  <label class="field">
+   <span>Email admin Supabase</span>
+   <input id="email" type="email" autocomplete="username"
+    placeholder="email@example.com">
+  </label>
+
+  <label class="field">
+   <span>Password</span>
+   <input id="password" type="password"
+    autocomplete="current-password" placeholder="Password akun">
+  </label>
+
+  <div class="dialog-actions">
+   <button class="btn ghost closeModal">Batal</button>
+   <button class="btn" id="loginBtn">Login</button>
+  </div>
+
+  <p class="notice">
+   Gunakan akun admin yang sudah dibuat di Supabase Authentication.
+  </p>
+ </div>
+</div>
+
+<!-- TAMBAH SCRIPT -->
+<div class="modal" id="addModal">
+ <div class="dialog">
+  <h2>Tambah Download Script</h2>
+
+  <label class="field">
+   <span>Nama hero</span>
+   <input id="heroName" placeholder="Contoh: Miya">
+  </label>
+
+  <label class="field">
+   <span>Nama skin</span>
+   <input id="skinName" placeholder="Contoh: Modena Butterfly">
+  </label>
+
+  <label class="field">
+   <span>Gambar lanskap</span>
+   <input id="imageFile" type="file" accept="image/*">
+   <img id="cropResultPreview" class="crop-preview" alt="Hasil crop foto">
+  </label>
+
+  <label class="field">
+   <span>Link download</span>
+   <input id="downloadUrl" type="url" placeholder="https://...">
+  </label>
+
+  <div class="dialog-actions">
+   <button class="btn ghost closeModal">Batal</button>
+   <button class="btn" id="saveBtn">Upload &amp; Simpan</button>
+  </div>
+
+  <p class="notice">
+   Gambar diunggah ke bucket products. Maksimal 5 MB.
+  </p>
+ </div>
+</div>
+
+<!-- TAMBAH KATEGORI -->
+<div class="modal" id="pageModal">
+ <div class="dialog">
+  <h2>Tambah Halaman Kategori</h2>
+  <label class="field"><span>Nama kategori / halaman</span><input id="pageTitle" placeholder="Contoh: Julian JJK"></label>
+  <label class="field"><span>Alamat URL (slug)</span><input id="pageSlug" placeholder="contoh: julian-jjk"></label>
+  <div class="dialog-actions"><button class="btn ghost closeModal">Batal</button><button class="btn" id="savePageBtn">Buat Halaman</button></div>
+  <p class="notice">Halaman memakai desain DISTENDANG. Video dan download yang ditambahkan saat membuka halaman ini hanya tampil di halaman tersebut.</p>
+ </div>
+</div>
+
+<div class="modal" id="cropModal">
+ <div class="dialog">
+  <h2>Atur Crop Foto</h2>
+  <p class="notice">Geser foto untuk mengatur posisi dan gunakan zoom agar foto pas.</p>
+  <div class="crop-workspace"><canvas id="cropCanvas" width="960" height="540"></canvas></div>
+  <div class="crop-controls"><span style="font-size:12px;color:var(--muted)">Zoom</span><input id="cropZoom" type="range" min="1" max="3" step="0.01" value="1"></div>
+  <div class="dialog-actions"><button class="btn ghost" id="cancelCrop">Batal</button><button class="btn" id="applyCrop">Gunakan Foto</button></div>
+ </div>
+</div>
+
+<div class="modal" id="videoModal">
+  <div class="dialog">
+    <h2>Tambah Video YouTube</h2>
+
+    <label class="field">
+      <span>Link YouTube</span>
+      <input id="youtubeUrl" type="url"
+        placeholder="https://youtu.be/xxxxx">
+    </label>
+
+    <label class="field">
+      <span>Judul Video</span>
+      <input id="youtubeTitle"
+        placeholder="Masukkan judul video">
+    </label>
+
+    <div class="dialog-actions">
+      <button class="btn ghost closeModal">Batal</button>
+      <button class="btn" id="saveVideoBtn">Simpan Video</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP SUPPORT -->
+<div class="sheet-overlay" id="sheetOverlay"></div>
+
+<section class="bottom-sheet" id="supportSheet"
+ role="dialog" aria-modal="true">
+
+ <div class="sheet-handle"></div>
+ <button class="sheet-close" id="closeSheet">✕</button>
+
+ <h2 class="sheet-title">Dukung DISTENDANG</h2>
+
+ <p class="sheet-sub">
+  Dukungan kecil darimu menjadi semangat besar bagi kami
+  untuk terus berkembang dan menghadirkan karya baru.
+ </p>
+
+ <img class="qris"
+  src="https://xnlrmcpkekvphvdnldnf.supabase.co/storage/v1/object/public/products/IMG_1343.png"
+  alt="QRIS Support DISTENDANG">
+
+ <p class="sheet-quote">
+  “Tidak harus besar untuk berarti.
+  Setiap dukungan kecil punya cerita dan arti tersendiri.
+  Terima kasih sudah menjadi bagian dari perjalanan kami.”
+ </p>
+
+ <a class="sheet-link saweria"
+  href="https://saweria.co/DISTENDANG"
+  target="_blank" rel="noopener">
+  Dukung melalui Saweria ↗
+ </a>
+
+ <div class="sheet-credit">
+  Terima kasih atas kebaikan dan dukunganmu.<br>
+  <strong>Created with care by DISTENDANG</strong><br>
+  © <span class="yearNow"></span> · All Rights Reserved
+ </div>
+</section>
+
+<!-- POPUP ORDER -->
+<section class="bottom-sheet" id="orderSheet"
+ role="dialog" aria-modal="true">
+
+ <div class="sheet-handle"></div>
+ <button class="sheet-close closeOrderSheet">✕</button>
+
+ <h2 class="sheet-title">Order Script</h2>
+
+ <p class="sheet-sub">
+  Punya ide atau membutuhkan script tertentu?
+  Ceritakan kebutuhanmu kepada kami.
+  Kami akan berusaha membantu mewujudkannya.
+ </p>
+
+ <a class="sheet-link instagram"
+  href="https://www.instagram.com/disststore?dlrf=azc0dWNranQxNDl0"
+  target="_blank" rel="noopener">
+  Instagram @disststore ↗
+ </a>
+
+ <p class="sheet-quote">
+  “Terima kasih sudah mempercayai karya kami.
+  Semoga setiap script yang kamu pesan membawa manfaat
+  dan memudahkan aktivitasmu.”
+ </p>
+
+ <div class="sheet-credit">
+  Terima kasih sudah mendukung karya kami.<br>
+  <strong>Created with care by DISTENDANG</strong><br>
+  © <span class="yearNow"></span> · All Rights Reserved
+ </div>
+</section>
+
+<!-- MUSIK -->
+<button class="music-hint" id="musicHint">
+ ▶ Putar musik
+</button>
+
+<audio id="siteMusic" preload="none" loop>
+ <source src="https://xnlrmcpkekvphvdnldnf.supabase.co/storage/v1/object/public/music/Somebody_s%20Pleasure.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* =====================================
+   SUPABASE
+===================================== */
+
+const SUPABASE_URL =
+"https://xnlrmcpkekvphvdnldnf.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"sb_publishable_lzNqCKActlT5REc-Batm3w_JISS7AkM";
+
+const BUCKET = "products";
+const TABLE = "downloads";
+
+const client = window.supabase.createClient(
+ SUPABASE_URL,
+ SUPABASE_ANON_KEY
+);
+
+
+const $ = id => document.getElementById(id);
+const grid = $("downloadGrid");
+const SITE_BASE = "/distendang/";
+let activePageSlug = null;
+let routeReady = false;
+let routeNotFound = false;
+
+$("year").textContent = new Date().getFullYear();
+
+document.querySelectorAll(".yearNow").forEach(el=>{
+ el.textContent = new Date().getFullYear();
+});
+
+/* =====================================
+   BANNER SLIDER
+===================================== */
+
+let slideIndex = 0;
+
+const slides = $("slides");
+const dots = [...document.querySelectorAll(".dot")];
+
+function showSlide(index){
+ slideIndex = (index + 3) % 3;
+ slides.style.transform =
+  `translateX(-${slideIndex * 100}%)`;
+
+ dots.forEach((dot,i)=>{
+  dot.classList.toggle("active",i === slideIndex);
+ });
+}
+
+dots.forEach((dot,i)=>{
+ dot.addEventListener("click",()=>showSlide(i));
+});
+
+setInterval(()=>{
+ showSlide(slideIndex + 1);
+},5000);
+
+/* =====================================
+   MODAL
+===================================== */
+
+function openModal(id){
+ $(id).classList.add("show");
+}
+
+function closeModals(){
+ document.querySelectorAll(".modal").forEach(m=>{
+  m.classList.remove("show");
+ });
+}
+
+document.querySelectorAll(".closeModal").forEach(b=>{
+ b.addEventListener("click",closeModals);
+});
+
+document.querySelectorAll(".modal").forEach(m=>{
+ m.addEventListener("click",e=>{
+  if(e.target === m) closeModals();
+ });
+});
+
+/* PERINGATAN AWAL + FITUR CROP FOTO */
+$("warningOkay").addEventListener("click",()=>{$("warningModal").classList.add("hidden");startMusic();});
+$("warningBack").addEventListener("click",()=>{stopMusic();if(document.referrer)history.back();else window.location.replace("https://youtube.com/@distendang?si=XWFelgK8Y1s0vEb2");});
+let cropImage=null,croppedImageFile=null,cropScale=1,cropOffsetX=0,cropOffsetY=0,cropPointer=null;
+const cropCanvas=$("cropCanvas"),cropCtx=cropCanvas.getContext("2d");
+function drawCrop(){
+ if(!cropImage)return;const cw=cropCanvas.width,ch=cropCanvas.height;
+ const base=Math.max(cw/cropImage.naturalWidth,ch/cropImage.naturalHeight),scale=base*cropScale;
+ const dw=cropImage.naturalWidth*scale,dh=cropImage.naturalHeight*scale;
+ cropOffsetX=Math.min(0,Math.max(cw-dw,cropOffsetX));cropOffsetY=Math.min(0,Math.max(ch-dh,cropOffsetY));
+ cropCtx.clearRect(0,0,cw,ch);cropCtx.drawImage(cropImage,cropOffsetX,cropOffsetY,dw,dh);
+}
+$("imageFile").addEventListener("change",()=>{
+ const file=$("imageFile").files[0];croppedImageFile=null;$("cropResultPreview").style.display="none";if(!file)return;
+ if(!file.type.startsWith("image/")){alert("File harus berupa gambar.");$("imageFile").value="";return;}
+ const reader=new FileReader();reader.onload=()=>{cropImage=new Image();cropImage.onload=()=>{
+  cropScale=1;const b=Math.max(cropCanvas.width/cropImage.naturalWidth,cropCanvas.height/cropImage.naturalHeight);
+  cropOffsetX=(cropCanvas.width-cropImage.naturalWidth*b)/2;cropOffsetY=(cropCanvas.height-cropImage.naturalHeight*b)/2;
+  $("cropZoom").value="1";drawCrop();openModal("cropModal");
+ };cropImage.onerror=()=>alert("Foto tidak dapat dibuka.");cropImage.src=reader.result;};reader.readAsDataURL(file);
+});
+$("cropZoom").addEventListener("input",()=>{if(!cropImage)return;const old=cropScale;cropScale=Number($("cropZoom").value);const q=cropScale/old,cx=cropCanvas.width/2,cy=cropCanvas.height/2;cropOffsetX=cx-(cx-cropOffsetX)*q;cropOffsetY=cy-(cy-cropOffsetY)*q;drawCrop();});
+cropCanvas.addEventListener("pointerdown",e=>{if(!cropImage)return;cropPointer={x:e.clientX,y:e.clientY};cropCanvas.setPointerCapture(e.pointerId);});
+cropCanvas.addEventListener("pointermove",e=>{if(!cropPointer)return;const r=cropCanvas.getBoundingClientRect();cropOffsetX+=(e.clientX-cropPointer.x)*cropCanvas.width/r.width;cropOffsetY+=(e.clientY-cropPointer.y)*cropCanvas.height/r.height;cropPointer={x:e.clientX,y:e.clientY};drawCrop();});
+["pointerup","pointercancel","lostpointercapture"].forEach(n=>cropCanvas.addEventListener(n,()=>cropPointer=null));
+$("cancelCrop").addEventListener("click",()=>{$("imageFile").value="";croppedImageFile=null;cropImage=null;closeModals();});
+$("applyCrop").addEventListener("click",()=>{if(!cropImage)return;$("applyCrop").disabled=true;cropCanvas.toBlob(blob=>{$("applyCrop").disabled=false;if(!blob){alert("Gagal membuat hasil crop.");return;}croppedImageFile=new File([blob],"distendang-crop-"+Date.now()+".jpg",{type:"image/jpeg"});const preview=$("cropResultPreview");if(preview.dataset.objectUrl)URL.revokeObjectURL(preview.dataset.objectUrl);preview.dataset.objectUrl=URL.createObjectURL(blob);preview.src=preview.dataset.objectUrl;preview.style.display="block";closeModals();},"image/jpeg",0.9);});
+
+/* =====================================
+   POPUP DARI BAWAH
+===================================== */
+
+const overlay = $("sheetOverlay");
+const supportSheet = $("supportSheet");
+const orderSheet = $("orderSheet");
+
+function closeSheets(){
+ overlay.classList.remove("show");
+ supportSheet.classList.remove("show");
+ orderSheet.classList.remove("show");
+ document.body.style.overflow = "";
+}
+
+function openSheet(type){
+ closeSheets();
+ overlay.classList.add("show");
+
+ if(type === "support"){
+  supportSheet.classList.add("show");
+ }else{
+  orderSheet.classList.add("show");
+ }
+
+ document.body.style.overflow = "hidden";
+}
+
+$("openSupport").addEventListener("click",()=>{
+ openSheet("support");
+});
+
+$("openOrder").addEventListener("click",()=>{
+ openSheet("order");
+});
+
+$("closeSheet").addEventListener("click",closeSheets);
+
+document.querySelectorAll(".closeOrderSheet").forEach(b=>{
+ b.addEventListener("click",closeSheets);
+});
+
+overlay.addEventListener("click",closeSheets);
+
+document.addEventListener("keydown",e=>{
+ if(e.key === "Escape"){
+  closeSheets();
+  closeModals();
+ }
+});
+
+/* =====================================
+   LOGIN ADMIN
+===================================== */
+
+let isAdmin = false;
+
+function updateAdmin(loggedIn){
+ isAdmin = !!loggedIn;
+ const adminTools=$("adminTools");
+ const settingsBtn=$("settingsBtn");
+ if(adminTools) adminTools.classList.toggle("show",isAdmin && !routeNotFound);
+ if(settingsBtn) settingsBtn.textContent=isAdmin ? "Keluar Admin" : "⚙ Pengaturan";
+ const categorySection=$("categorySection");
+ if(categorySection) categorySection.classList.toggle("show",isAdmin && !activePageSlug && !routeNotFound);
+ if(routeReady && !routeNotFound && $("downloadGrid")){
+  loadItems();
+  loadLatestVideos();
+  if($("categoryGrid") && isAdmin && !activePageSlug) loadPages();
+ }
+}
+
+$("settingsBtn").addEventListener("click",async()=>{
+ const {data:{session}} = await client.auth.getSession();
+
+ if(session){
+  await client.auth.signOut();
+  updateAdmin(false);
+  alert("Berhasil logout admin.");
+ }else{
+  openModal("loginModal");
+ }
+});
+
+$("addScriptBtn").addEventListener("click",()=>{
+  openModal("addModal");
+});
+
+client.auth.onAuthStateChange((_event,session)=>{
+ updateAdmin(!!session);
+});
+
+client.auth.getSession().then(({data})=>{
+ updateAdmin(!!data.session);
+});
+
+$("loginBtn").addEventListener("click",async()=>{
+ const email = $("email").value.trim();
+ const password = $("password").value;
+
+ if(!email || !password){
+  return alert("Isi email dan password.");
+ }
+
+ const {error} = await client.auth.signInWithPassword({
+  email,password
+ });
+
+ if(error){
+  return alert("Login gagal: " + error.message);
+ }
+
+ closeModals();
+ $("password").value = "";
+ alert("Login admin berhasil.");
+});
+
+/* =====================================
+   KEAMANAN LINK DAN TEKS
+===================================== */
+
+function safeUrl(url){
+ try{
+  const u = new URL(url);
+  return ["http:","https:"].includes(u.protocol)
+   ? u.href : "#";
+ }catch{
+  return "#";
+ }
+}
+
+function escapeHtml(value){
+ return String(value ?? "").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",
+  '"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+/* =====================================
+   DATA DOWNLOAD
+===================================== */
+
+function renderItems(items){
+
+ $("totalTag").textContent =
+  `${items.length} SCRIPT`;
+
+ if(!items.length){
+  grid.innerHTML =
+   '<div class="empty">Belum ada script. Admin bisa menambahkan konten melalui Pengaturan.</div>';
+  return;
+ }
+
+ grid.innerHTML = items.map(item=>`
+  <article class="card">
+
+   <img class="card-img"
+    src="${escapeHtml(item.image_url)}"
+    alt="${escapeHtml(item.hero_name)}"
+    loading="lazy">
+
+   <div class="card-body">
+    <h3 class="hero-name">${escapeHtml(item.hero_name)}</h3>
+
+    <div class="script-info">
+     <span class="script-label">SCRIPT:</span>
+     <span class="script-value">${escapeHtml(item.skin_name)}</span>
+    </div>
+
+    <div class="card-foot">
+     <a class="download"
+      href="${safeUrl(item.download_url)}"
+      target="_blank"
+      rel="noopener noreferrer">
+      ⬇ UNDUH SCRIPT
+     </a>
+     ${isAdmin ? `<button class="delete-btn" type="button" data-delete-download="${escapeHtml(item.id)}">🗑 HAPUS</button>` : ""}
+    </div>
+   </div>
+  </article>
+ `).join("");
+
+}
+
+/* =====================================
+   MUAT DATA DOWNLOAD
+===================================== */
+
+grid.addEventListener("click", async event => {
+  const button = event.target.closest("[data-delete-download]");
+  if (!button) return;
+
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) {
+    alert("Login admin terlebih dahulu.");
+    updateAdmin(false);
+    return;
+  }
+
+  if (!confirm("Yakin ingin menghapus download script ini?")) return;
+  button.disabled = true;
+  button.textContent = "Menghapus...";
+
+  try {
+    const imageUrl = button.closest(".card")?.querySelector(".card-img")?.src || "";
+    const { error } = await client.from(TABLE).delete().eq("id", button.dataset.deleteDownload);
+    if (error) throw error;
+
+    const marker = `/storage/v1/object/public/${BUCKET}/`;
+    const markerIndex = imageUrl.indexOf(marker);
+    if (markerIndex !== -1) {
+      const storagePath = decodeURIComponent(imageUrl.slice(markerIndex + marker.length));
+      const { error: storageError } = await client.storage.from(BUCKET).remove([storagePath]);
+      if (storageError) console.warn("Data terhapus, tetapi gambar gagal dihapus dari Storage:", storageError);
+    }
+
+    await loadItems();
+    alert("Download script berhasil dihapus.");
+  } catch (error) {
+    console.error(error);
+    alert("Gagal menghapus download: " + error.message);
+    button.disabled = false;
+    button.textContent = "🗑 Hapus";
+  }
+});
+
+async function loadItems(){
+  grid.innerHTML =
+    '<div class="empty">Memuat daftar download...</div>';
+
+  let request = client
+    .from(TABLE)
+    .select("id,hero_name,skin_name,image_url,download_url,created_at,page_id")
+    .order("created_at", { ascending: false });
+
+  request = activePageSlug
+    ? request.eq("page_id", activePageSlug)
+    : request.is("page_id", null);
+
+  const { data, error } = await request;
+
+  if(error){
+    console.error("Gagal memuat download:", error);
+    grid.innerHTML =
+      '<div class="empty">Gagal memuat daftar download. Periksa koneksi dan kebijakan Supabase.</div>';
+    return;
+  }
+
+  renderItems(data || []);
+}
+
+/* =====================================
+   TAMBAH DOWNLOAD
+===================================== */
+
+$("saveBtn").addEventListener("click",async()=>{
+
+ const hero = $("heroName").value.trim();
+ const skin = $("skinName").value.trim();
+
+ const link = safeUrl(
+  $("downloadUrl").value.trim()
+ );
+
+ const file = croppedImageFile;
+
+ if(!hero || !skin || link === "#" || !file){
+  return alert("Lengkapi semua data dan crop foto terlebih dahulu.");
+ }
+
+ if(!file.type.startsWith("image/")){
+  return alert("File harus berupa gambar.");
+ }
+
+ if(file.size > 5 * 1024 * 1024){
+  return alert("Ukuran hasil crop maksimal 5 MB.");
+ }
+
+ const {data:{session}} = await client.auth.getSession();
+
+ if(!session){
+  return alert("Login admin terlebih dahulu.");
+ }
+
+ $("saveBtn").disabled = true;
+ $("saveBtn").textContent = "Mengunggah...";
+
+ try{
+
+  const ext = (
+   file.name.split(".").pop() || "jpg"
+  ).toLowerCase().replace(/[^a-z0-9]/g,"");
+
+  const path =
+   `distendang/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+
+  const {error:uploadError} = await client.storage
+   .from(BUCKET)
+   .upload(path,file,{
+    upsert:false,
+    contentType:file.type
+   });
+
+  if(uploadError) throw uploadError;
+
+  const {data:{publicUrl}} =
+   client.storage.from(BUCKET).getPublicUrl(path);
+
+  const {error:insertError} = await client
+   .from(TABLE)
+   .insert({
+    hero_name:hero,
+    skin_name:skin,
+    image_url:publicUrl,
+    download_url:link,
+    created_by:session.user.id,
+    page_id:activePageSlug
+   });
+
+  if(insertError) throw insertError;
+
+  closeModals();
+
+  $("heroName").value = "";
+  $("skinName").value = "";
+  $("downloadUrl").value = "";
+  $("imageFile").value = "";
+
+  await loadItems();
+
+  alert("Script berhasil ditambahkan!");
+
+ }catch(error){
+  console.error(error);
+  alert("Gagal menyimpan: " + error.message);
+
+ }finally{
+  $("saveBtn").disabled = false;
+  $("saveBtn").textContent = "Upload & Simpan";
+ }
+});
+
+/* =====================================
+   HALAMAN DINAMIS / KATEGORI ADMIN
+===================================== */
+
+function makeSlug(value){
+ return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+  .toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");
+}
+
+$("pageTitle").addEventListener("input",()=>{
+ if(!$("pageSlug").dataset.edited) $("pageSlug").value=makeSlug($("pageTitle").value);
+});
+$("pageSlug").addEventListener("input",()=>{$("pageSlug").dataset.edited="1";});
+$("addPageBtn").addEventListener("click",()=>{
+ $("pageTitle").value="";
+ $("pageSlug").value="";
+ $("pageSlug").dataset.edited="";
+ openModal("pageModal");
+});
+
+async function loadPages(){
+ const box=$("categoryGrid");
+ if(!box || !isAdmin || activePageSlug) return;
+ const {data,error}=await client.from("pages")
+  .select("id,slug,title,created_at")
+  .order("created_at",{ascending:false});
+ if(error){
+  box.innerHTML='<div class="empty">Gagal memuat daftar halaman. Periksa tabel pages dan kebijakan SELECT.</div>';
+  console.error(error);
+  return;
+ }
+ $("categoryTotal").textContent=`${(data||[]).length} HALAMAN`;
+ if(!data?.length){
+  box.innerHTML='<div class="empty">Belum ada halaman. Buat halaman melalui tombol Tambah Kategori.</div>';
+  return;
+ }
+ box.innerHTML=data.map(page=>`
+  <article class="card" style="height:auto;min-height:120px;max-height:none;grid-template-columns:1fr">
+   <div class="card-body">
+    <h3 class="hero-name">${escapeHtml(page.title)}</h3>
+    <div class="script-info"><span class="script-label">URL:</span><span class="script-value">/distendang/${escapeHtml(page.slug)}/</span></div>
+    <div class="card-foot">
+     <a class="download" href="${SITE_BASE}${encodeURIComponent(page.slug)}/">BUKA HALAMAN ↗</a>
+     <button class="delete-btn" type="button" data-delete-page="${escapeHtml(page.id)}">HAPUS HALAMAN</button>
+    </div>
+   </div>
+  </article>`).join("");
+}
+
+$("savePageBtn").addEventListener("click",async()=>{
+ const title=$("pageTitle").value.trim();
+ const slug=makeSlug($("pageSlug").value);
+ const {data:{session}}=await client.auth.getSession();
+ if(!session) return alert("Login admin terlebih dahulu.");
+ if(!title || !slug) return alert("Isi nama halaman dan alamat URL.");
+ if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
+  return alert("Alamat URL hanya boleh berisi huruf kecil, angka, dan tanda hubung.");
+ const btn=$("savePageBtn");
+ btn.disabled=true;
+ btn.textContent="Membuat halaman...";
+ try{
+  const {error}=await client.from("pages").insert({slug,title,html:""});
+  if(error) throw error;
+  closeModals();
+  await loadPages();
+  alert("Halaman berhasil dibuat. Link: "+SITE_BASE+slug+"/");
+ }catch(error){
+  console.error(error);
+  alert("Gagal membuat halaman: "+error.message);
+ }finally{
+  btn.disabled=false;
+  btn.textContent="Buat Halaman";
+ }
+});
+
+$("categoryGrid").addEventListener("click",async event=>{
+ const btn=event.target.closest("[data-delete-page]");
+ if(!btn) return;
+ const {data:{session}}=await client.auth.getSession();
+ if(!session) return alert("Login admin terlebih dahulu.");
+ if(!confirm("Hapus halaman ini dari daftar? Data download dan video yang sudah tersimpan tidak ikut dihapus.")) return;
+ btn.disabled=true;
+ btn.textContent="Menghapus...";
+ const {error}=await client.from("pages").delete().eq("id",btn.dataset.deletePage);
+ if(error){
+  alert("Gagal menghapus halaman: "+error.message);
+  btn.disabled=false;
+  btn.textContent="HAPUS HALAMAN";
+  return;
+ }
+ await loadPages();
+});
+
+async function openCategoryFromPath(){
+ routeReady=false;
+ routeNotFound=false;
+ const url=new URL(location.href);
+ const base=SITE_BASE;
+ let pathname;
+ try{ pathname=decodeURIComponent(url.pathname); }
+ catch(_){ pathname=url.pathname; }
+ let slug=url.searchParams.get("page") || "";
+ if(!slug && pathname.startsWith(base)){
+  slug=pathname.slice(base.length).split("/").filter(Boolean)[0] || "";
+ }
+ activePageSlug=slug ? makeSlug(slug) : null;
+
+ if(activePageSlug){
+  const cleanPath=base+encodeURIComponent(activePageSlug)+"/";
+  // Ubah URL query fallback menjadi URL halaman yang rapi.
+  if(pathname===base || pathname===base.slice(0,-1) || url.searchParams.has("page")){
+   history.replaceState(null,"",cleanPath);
+  }
+  let result;
+  try{
+   result=await client.from("pages").select("title").eq("slug",activePageSlug).maybeSingle();
+  }catch(error){
+   result={data:null,error};
+  }
+  if(result.error || !result.data){
+   routeNotFound=true;
+   routeReady=true;
+   document.title="404 — Halaman Tidak Ditemukan | DISTENDANG";
+   // Sembunyikan seluruh aplikasi biasa, popup, dan musik untuk slug yang tidak terdaftar.
+   document.querySelectorAll("body > *").forEach(el=>{
+    if(el.id==="notFoundPage") return;
+    el.hidden=true;
+   });
+   $("notFoundPage").hidden=false;
+   return;
+  }
+
+  document.title=result.data.title+" — DISTENDANG";
+  const hero=$("slides")?.closest(".hero");
+  if(hero) hero.style.display="none";
+  const categorySection=$("categorySection");
+  if(categorySection) categorySection.style.display="none";
+  const headings=document.querySelectorAll("main > .section-head");
+  const downloadHead=headings.length ? headings[headings.length-1] : null;
+  const heading=downloadHead?.querySelector("h2");
+  if(heading) heading.textContent=result.data.title;
+  const description=downloadHead?.querySelector("p");
+  if(description) description.textContent="Koleksi download dan video khusus "+result.data.title+".";
+  routeReady=true;
+  updateAdmin(isAdmin);
+  await loadItems();
+  await loadLatestVideos();
+  return;
+ }
+
+ // Beranda utama.
+ document.title="DISTENDANG — Download Script";
+ const hero=$("slides")?.closest(".hero");
+ if(hero) hero.style.display="";
+ const categorySection=$("categorySection");
+ if(categorySection) categorySection.style.display="";
+ routeReady=true;
+ updateAdmin(isAdmin);
+ await loadItems();
+ await loadLatestVideos();
+ const {data:{session}}=await client.auth.getSession();
+ if(session) await loadPages();
+}
+
+/* =====================================
+   YOUTUBE DISTENDANG
+===================================== */
+
+/*
+PENTING:
+Masukkan Channel ID YouTube yang dimulai dengan UC.
+Jangan masukkan nama channel atau URL handle di sini.
+*/
+
+/* =====================================
+   MUSIK WEBSITE
+===================================== */
+
+const music = $("siteMusic");
+const musicHint = $("musicHint");
+
+async function startMusic(){
+ try{
+  await music.play();
+  }catch(error){
+   musicHint.classList.add("show");
+  }
+}
+
+function stopMusic(){
+ music.pause();
+ music.currentTime = 0;
+}
+
+musicHint.addEventListener("click",startMusic);
+
+// Musik dimulai setelah pengunjung menekan tombol OKE.
+
+document.addEventListener("visibilitychange",()=>{
+ if(document.hidden){
+  stopMusic();
+ }
+});
+
+window.addEventListener("pagehide",stopMusic);
+window.addEventListener("beforeunload",stopMusic);
+
+
+/* =================================
+   TAMBAH VIDEO YOUTUBE VIA ADMIN
+================================= */
+
+function getYoutubeId(url) {
+  try {
+    const u = new URL(url);
+    let id = "";
+
+    if (u.hostname.includes("youtu.be")) {
+      id = u.pathname.split("/").filter(Boolean)[0];
+    } else if (u.hostname.includes("youtube.com")) {
+      if (u.pathname === "/watch") {
+        id = u.searchParams.get("v");
+      } else {
+        const parts = u.pathname.split("/").filter(Boolean);
+        id = parts[parts.length - 1];
+      }
+    }
+
+    return /^[a-zA-Z0-9_-]{11}$/.test(id || "")
+      ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+// Buka popup tambah video
+$("addVideoBtn").addEventListener("click", () => {
+  openModal("videoModal");
+});
+
+// Simpan video
+$("saveVideoBtn").addEventListener("click", async () => {
+  const url = $("youtubeUrl").value.trim();
+  const title = $("youtubeTitle").value.trim();
+  const youtubeId = getYoutubeId(url);
+
+  if (!youtubeId) {
+    alert("Link YouTube tidak valid. Periksa kembali.");
+    return;
+  }
+
+  if (!title) {
+    alert("Masukkan judul video terlebih dahulu.");
+    return;
+  }
+
+  const { data: { session } } =
+    await client.auth.getSession();
+
+  if (!session) {
+    alert("Silakan login admin terlebih dahulu.");
+    return;
+  }
+
+  const button = $("saveVideoBtn");
+  button.disabled = true;
+  button.textContent = "Menyimpan...";
+
+  try {
+    const { error } = await client
+      .from("youtube_videos")
+      .insert({
+        youtube_id: youtubeId,
+        video_url: url,
+        title: title,
+        page_id: activePageSlug
+      });
+
+    if (error) throw error;
+
+    $("youtubeUrl").value = "";
+    $("youtubeTitle").value = "";
+
+    closeModals();
+
+    await loadLatestVideos();
+
+    alert("Video berhasil ditambahkan!");
+
+  } catch (error) {
+    alert("Gagal menyimpan video: " + error.message);
+    console.error(error);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Simpan Video";
+  }
+});
+
+// Tampilkan 3 video terbaru
+async function loadLatestVideos() {
+  const videoGrid = $("videoGrid");
+
+  let request = client
+    .from("youtube_videos")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  request = activePageSlug
+    ? request.eq("page_id", activePageSlug)
+    : request.is("page_id", null);
+
+  const { data, error } = await request.limit(3);
+
+  if (error) {
+    videoGrid.innerHTML =
+      '<div class="video-loading">Gagal memuat video. Periksa Supabase.</div>';
+    console.error(error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    videoGrid.innerHTML =
+      '<div class="video-loading">Belum ada video. Admin bisa menambahkannya.</div>';
+    return;
+  }
+
+  videoGrid.innerHTML = data.map(video => `
+    <article class="video-card">
+      <a href="${safeUrl(video.video_url)}"
+         target="_blank"
+         rel="noopener noreferrer"
+         style="display:block;color:white;text-decoration:none">
+
+        <img class="video-thumb"
+          src="https://img.youtube.com/vi/${encodeURIComponent(video.youtube_id)}/hqdefault.jpg"
+          alt="${escapeHtml(video.title)}"
+          loading="lazy">
+
+        <div class="video-info">
+          <div class="video-title">
+            ${escapeHtml(video.title)}
+          </div>
+          <div class="video-date">DISTENDANG · YouTube</div>
+        </div>
+      </a>
+      ${isAdmin ? `<div class="card-admin-actions" style="padding:0 12px 12px"><button class="delete-btn" type="button" data-delete-video="${escapeHtml(video.id)}">🗑 Hapus Video</button></div>` : ""}
+    </article>
+  `).join("");
+}
+
+$("videoGrid").addEventListener("click", async event => {
+  const button = event.target.closest("[data-delete-video]");
+  if (!button) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) {
+    alert("Login admin terlebih dahulu.");
+    updateAdmin(false);
+    return;
+  }
+
+  if (!confirm("Yakin ingin menghapus video YouTube ini?")) return;
+  button.disabled = true;
+  button.textContent = "Menghapus...";
+
+  try {
+    const { data: deletedRows, error } = await client
+      .from("youtube_videos")
+      .delete()
+      .eq("id", button.dataset.deleteVideo)
+      .select("id");
+
+    if (error) throw error;
+
+    if (!deletedRows || deletedRows.length === 0) {
+      throw new Error(
+        "Video tidak terhapus. Periksa kebijakan DELETE (RLS) pada tabel youtube_videos di Supabase."
+      );
+    }
+
+    await loadLatestVideos();
+    alert("Video YouTube berhasil dihapus.");
+  } catch (error) {
+    console.error(error);
+    alert("Gagal menghapus video: " + error.message);
+    button.disabled = false;
+    button.textContent = "🗑 Hapus Video";
+  }
+});
+
+/* =====================================
+   MULAI WEBSITE
+===================================== */
+
+openCategoryFromPath();
+
+</script>
+</body>
+</html>
