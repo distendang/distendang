@@ -289,6 +289,15 @@ main{padding:17px 14px 50px}
 .so-actions{grid-template-columns:1fr}
 }
 
+/* INTRO KHUSUS HALAMAN KATEGORI */
+.category-intro{position:fixed;inset:0;z-index:110;display:none;align-items:center;justify-content:center;padding:20px;background:#000e}
+.category-intro.show{display:flex}
+.category-intro-card{width:min(430px,100%);padding:25px 21px;border-radius:20px;background:#111522;border:1px solid #8b5cf6;box-shadow:0 18px 55px #000b;text-align:center}
+.category-intro-card h2{margin:0 0 12px;color:#c4b5fd;font-size:21px}
+.category-intro-card p{margin:0;color:#e1e5f0;font-size:14px;line-height:1.7}
+.category-intro-card button{width:100%;margin-top:20px;padding:13px;border:0;border-radius:11px;background:linear-gradient(135deg,#8b5cf6,#4f46e5);color:#fff;font-weight:900}
+body.category-page #settingsBtn{display:none!important}
+
 /* PERINGATAN AWAL DAN CROP FOTO */
 .warning-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:#000}
 .warning-modal.hidden{display:none}
@@ -376,6 +385,13 @@ main{padding:17px 14px 50px}
   <a class="notfound-home" href="/distendang/">KEMBALI KE BERANDA</a>
  </div>
 </main>
+<div class="category-intro" id="categoryIntro" role="dialog" aria-modal="true" aria-labelledby="categoryIntroTitle">
+ <div class="category-intro-card">
+  <h2 id="categoryIntroTitle">SELAMAT DATANG</h2>
+  <p>Ini adalah halaman koleksi script khusus. Pastikan kamu membaca informasi sebelum melanjutkan.</p>
+  <button type="button" id="categoryIntroContinue">LANJUTKAN</button>
+ </div>
+</div>
 <div class="warning-modal" id="warningModal">
  <div class="warning-card">
   <h2>PERINGATAN</h2>
@@ -807,6 +823,10 @@ document.querySelectorAll(".modal").forEach(m=>{
 });
 
 /* PERINGATAN AWAL + FITUR CROP FOTO */
+$("categoryIntroContinue").addEventListener("click",()=>{
+ $("categoryIntro").classList.remove("show");
+ $("warningModal").classList.remove("hidden");
+});
 $("warningOkay").addEventListener("click",()=>{$("warningModal").classList.add("hidden");startMusic();});
 $("warningBack").addEventListener("click",()=>{stopMusic();if(document.referrer)history.back();else window.location.replace("https://youtube.com/@distendang?si=XWFelgK8Y1s0vEb2");});
 let cropImage=null,croppedImageFile=null,cropScale=1,cropOffsetX=0,cropOffsetY=0,cropPointer=null;
@@ -1309,8 +1329,13 @@ async function openCategoryFromPath(){
   }
 
   document.title=result.data.title+" — DISTENDANG";
+  document.body.classList.add("category-page");
+  // Banner/hero tetap ditampilkan di halaman kategori.
   const hero=$("slides")?.closest(".hero");
-  if(hero) hero.style.display="none";
+  if(hero) hero.style.display="";
+  // Intro kategori tampil lebih dahulu, lalu popup peringatan yang sudah ada.
+  $("warningModal").classList.add("hidden");
+  $("categoryIntro").classList.add("show");
   const categorySection=$("categorySection");
   if(categorySection) categorySection.style.display="none";
   const headings=document.querySelectorAll("main > .section-head");
@@ -1327,6 +1352,9 @@ async function openCategoryFromPath(){
  }
 
  // Beranda utama.
+ document.body.classList.remove("category-page");
+ $("categoryIntro").classList.remove("show");
+ $("warningModal").classList.remove("hidden");
  document.title="DISTENDANG — Download Script";
  const hero=$("slides")?.closest(".hero");
  if(hero) hero.style.display="";
