@@ -288,6 +288,27 @@ main{padding:17px 14px 50px}
 .so-actions{grid-template-columns:1fr}
 }
 
+/* PANEL SERVER ADMIN - TERPISAH DARI WEBSITE KATEGORI */
+#serverPanel{display:none;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#1b2140 0%,#090b12 55%);padding:28px 18px 60px}
+body.server-home #serverPanel{display:block}
+body.server-home>header,body.server-home>main:not(#notFoundPage),body.server-home>footer{display:none!important}
+.server-wrap{max-width:1100px;margin:auto}
+.server-top{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;padding:14px 0 28px;border-bottom:1px solid #ffffff18}
+.server-brand{font-size:24px;font-weight:950;letter-spacing:1px}.server-brand span{color:#a78bfa}
+.server-sub{color:#aeb6c9;font-size:13px;margin-top:6px}
+.server-hero{padding:28px 0 22px}.server-hero h1{font-size:clamp(27px,5vw,42px);margin:0 0 9px}.server-hero p{color:#aeb6c9;margin:0;line-height:1.7}
+.server-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:18px}
+.server-site{background:#111522;border:1px solid #303951;border-radius:17px;padding:18px;min-width:0}
+.server-site h3{margin:0 0 7px;font-size:17px}.server-site p{margin:0 0 15px;color:#aeb6c9;font-size:12px;overflow-wrap:anywhere}
+.server-site-actions{display:flex;gap:8px;flex-wrap:wrap}.server-site-actions button{flex:1;min-width:95px}
+#pageEditorModal .dialog{width:min(850px,100%)}
+#pageHtml{width:100%;min-height:300px;resize:vertical;padding:13px;border-radius:10px;border:1px solid var(--line);background:#080b13;color:#dce3f8;font:13px/1.6 ui-monospace,monospace;tab-size:2}
+.editor-help{font-size:12px;color:var(--muted);line-height:1.7;margin:10px 0}
+body.server-home .modal#loginModal{z-index:200;background:#05060af5}
+body.server-home .modal#loginModal.show{display:flex}
+body.server-home .modal#loginModal .closeModal{display:none}
+body.server-home .modal#loginModal .dialog{border-color:#7658c9;box-shadow:0 20px 80px #000b}
+
 /* INTRO KHUSUS HALAMAN KATEGORI */
 .category-intro{position:fixed;inset:0;z-index:110;display:none;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at center,#17142d 0%,#05060b 65%,#000 100%)}
 .category-intro.show{display:flex}
@@ -390,6 +411,18 @@ body.category-page #settingsBtn{display:none!important}
   <a class="notfound-home" href="/distendang/">KEMBALI KE BERANDA</a>
  </div>
 </main>
+<section id="serverPanel">
+ <div class="server-wrap">
+  <div class="server-top">
+   <div><div class="server-brand">DIS<span>TENDANG</span> <small style="font-size:11px;color:#aeb6c9;letter-spacing:2px">SERVER</small></div><div class="server-sub">Control panel · Website management</div></div>
+   <button class="btn ghost" id="serverLogout">Keluar</button>
+  </div>
+  <div class="server-hero"><div class="eyebrow">ADMIN CONTROL CENTER</div><h1>Kelola Website</h1><p>Pilih website untuk membuka editor. Kamu bisa mengubah judul, foto, link, video, dan isi halaman melalui editor HTML.</p></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0">Daftar Website</h2><button class="btn" id="serverAddPage">＋ Website Baru</button></div>
+  <div class="server-list" id="serverSiteList"><div class="empty">Memuat daftar website...</div></div>
+ </div>
+</section>
+
 <div class="category-intro" id="categoryIntro" aria-hidden="true">
  <div class="category-intro-card">
   <div class="intro-brand"><span>DIS</span><strong>TENDANG</strong></div>
@@ -397,7 +430,7 @@ body.category-page #settingsBtn{display:none!important}
   <p class="intro-caption">SCRIPT COLLECTION</p>
  </div>
 </div>
-<div class="warning-modal" id="warningModal">
+<div class="warning-modal hidden" id="warningModal">
  <div class="warning-card">
   <h2>PERINGATAN</h2>
   <p>Script ini tidak bisa dipasang di iOS. Terlalu banyak memasang script bisa mengakibatkan terkena ban. Subscribe YouTube DISTENDANG.</p>
@@ -436,6 +469,7 @@ body.category-page #settingsBtn{display:none!important}
 
 
 <main>
+<div id="customPageContent" style="display:none"></div>
 
 <!-- BANNER ASLI -->
 <section class="hero">
@@ -555,7 +589,7 @@ body.category-page #settingsBtn{display:none!important}
 <!-- LOGIN ADMIN -->
 <div class="modal" id="loginModal">
  <div class="dialog">
-  <h2>Login Admin</h2>
+  <h2>Masuk ke DISTENDANG Server</h2>
 
   <label class="field">
    <span>Email admin Supabase</span>
@@ -570,12 +604,11 @@ body.category-page #settingsBtn{display:none!important}
   </label>
 
   <div class="dialog-actions">
-   <button class="btn ghost closeModal">Batal</button>
-   <button class="btn" id="loginBtn">Login</button>
+   <button class="btn" id="loginBtn" style="width:100%">Login</button>
   </div>
 
   <p class="notice">
-   Gunakan akun admin yang sudah dibuat di Supabase Authentication.
+   Masukkan email dan password admin untuk membuka panel pengelolaan website.
   </p>
  </div>
 </div>
@@ -625,6 +658,17 @@ body.category-page #settingsBtn{display:none!important}
   <label class="field"><span>Alamat URL (slug)</span><input id="pageSlug" placeholder="contoh: julian-jjk"></label>
   <div class="dialog-actions"><button class="btn ghost closeModal">Batal</button><button class="btn" id="savePageBtn">Buat Halaman</button></div>
   <p class="notice">Halaman memakai desain DISTENDANG. Video dan download yang ditambahkan saat membuka halaman ini hanya tampil di halaman tersebut.</p>
+ </div>
+</div>
+
+<div class="modal" id="pageEditorModal">
+ <div class="dialog">
+  <h2 id="pageEditorHeading">Editor Website</h2>
+  <label class="field"><span>Nama website</span><input id="editPageTitle" placeholder="Nama website"></label>
+  <label class="field"><span>Alamat halaman</span><input id="editPageSlug" disabled></label>
+  <label class="field"><span>Konten halaman (HTML)</span><textarea id="pageHtml" spellcheck="false" placeholder="Tulis HTML halaman di sini..."></textarea></label>
+  <p class="editor-help">Gunakan HTML untuk menambahkan foto (&lt;img&gt;), tautan (&lt;a&gt;), video YouTube (iframe embed), teks, tombol, dan bagian halaman lainnya. Contoh: &lt;img src="URL_FOTO"&gt; atau &lt;a href="URL"&gt;Buka link&lt;/a&gt;.</p>
+  <div class="dialog-actions"><button class="btn ghost closeModal">Batal</button><button class="btn" id="savePageContent">Simpan Perubahan</button></div>
  </div>
 </div>
 
@@ -834,11 +878,13 @@ function playCategoryIntro(){
  const warning=$("warningModal");
  if(categoryIntroTimer) clearTimeout(categoryIntroTimer);
  warning.classList.add("hidden");
+ warning.classList.add("hidden");
  intro.classList.add("show");
  categoryIntroTimer=setTimeout(()=>{
   intro.classList.remove("show");
-  warning.classList.remove("hidden");
- },2300);
+  // Beri jeda singkat setelah intro benar-benar hilang sebelum warning tampil.
+  categoryIntroTimer=setTimeout(()=>warning.classList.remove("hidden"),350);
+ },2600);
 }
 $("warningOkay").addEventListener("click",()=>{$("warningModal").classList.add("hidden");startMusic();});
 $("warningBack").addEventListener("click",()=>{stopMusic();if(document.referrer)history.back();else window.location.replace("https://youtube.com/@distendang?si=XWFelgK8Y1s0vEb2");});
@@ -957,6 +1003,10 @@ $("addScriptBtn").addEventListener("click",()=>{
 
 client.auth.onAuthStateChange((_event,session)=>{
  updateAdmin(!!session);
+ if(!activePageSlug && routeReady){
+  if(session) showServerPanel();
+  else {document.body.classList.add("server-home");openModal("loginModal");}
+ }
 });
 
 client.auth.getSession().then(({data})=>{
@@ -981,7 +1031,8 @@ $("loginBtn").addEventListener("click",async()=>{
 
  closeModals();
  $("password").value = "";
- alert("Login admin berhasil.");
+ if(!activePageSlug){ document.body.classList.add("server-home"); await showServerPanel(); }
+ alert("Login berhasil. Panel server siap digunakan.");
 });
 
 /* =====================================
@@ -1274,6 +1325,7 @@ $("savePageBtn").addEventListener("click",async()=>{
   if(error) throw error;
   closeModals();
   await loadPages();
+  if(document.body.classList.contains("server-home")) await loadServerSites();
   alert("Halaman berhasil dibuat. Link: "+SITE_BASE+slug+"/");
  }catch(error){
   console.error(error);
@@ -1302,6 +1354,43 @@ $("categoryGrid").addEventListener("click",async event=>{
  await loadPages();
 });
 
+let editingPageId=null;
+async function showServerPanel(){
+ document.body.classList.add("server-home");
+ const {data:{session}}=await client.auth.getSession();
+ if(!session){openModal("loginModal");return;}
+ await loadServerSites();
+}
+async function loadServerSites(){
+ const box=$("serverSiteList"); if(!box)return;
+ box.innerHTML='<div class="empty">Memuat daftar website...</div>';
+ const {data,error}=await client.from("pages").select("id,slug,title,created_at").order("created_at",{ascending:false});
+ if(error){box.innerHTML='<div class="empty">Gagal memuat website: '+escapeHtml(error.message)+'</div>';return;}
+ if(!data?.length){box.innerHTML='<div class="empty">Belum ada website. Tekan Website Baru untuk membuat halaman.</div>';return;}
+ box.innerHTML=data.map(page=>`<article class="server-site"><h3>${escapeHtml(page.title)}</h3><p>${SITE_BASE}${encodeURIComponent(page.slug)}/</p><div class="server-site-actions"><button class="btn" data-edit-site="${escapeHtml(page.id)}">BUKA EDITOR</button><button class="btn ghost" data-open-site="${escapeHtml(page.slug)}">LIHAT</button></div></article>`).join("");
+}
+$("serverSiteList").addEventListener("click",async e=>{
+ const edit=e.target.closest("[data-edit-site]");
+ const view=e.target.closest("[data-open-site]");
+ if(view){alert("Untuk mengunjungi website publik, gunakan link halaman ini: "+SITE_BASE+encodeURIComponent(view.dataset.openSite)+"/");return;}
+ if(!edit)return;
+ const {data,error}=await client.from("pages").select("id,slug,title,html").eq("id",edit.dataset.editSite).single();
+ if(error)return alert("Gagal membuka editor: "+error.message);
+ editingPageId=data.id; $("editPageTitle").value=data.title||""; $("editPageSlug").value=data.slug||""; $("pageHtml").value=data.html||"";
+ $("pageEditorHeading").textContent="Editor · "+(data.title||data.slug); openModal("pageEditorModal");
+});
+$("savePageContent").addEventListener("click",async()=>{
+ if(!editingPageId)return;
+ const title=$("editPageTitle").value.trim(); if(!title)return alert("Nama website tidak boleh kosong.");
+ const btn=$("savePageContent");btn.disabled=true;btn.textContent="Menyimpan...";
+ const {error}=await client.from("pages").update({title,html:$("pageHtml").value}).eq("id",editingPageId);
+ btn.disabled=false;btn.textContent="Simpan Perubahan";
+ if(error)return alert("Gagal menyimpan: "+error.message);
+ closeModals();await loadServerSites();alert("Perubahan website berhasil disimpan.");
+});
+$("serverAddPage").addEventListener("click",()=>{$("pageTitle").value="";$ ("pageSlug").value="";$("pageSlug").dataset.edited="";openModal("pageModal");});
+$("serverLogout").addEventListener("click",async()=>{await client.auth.signOut();document.body.classList.remove("server-home");updateAdmin(false);openModal("loginModal");});
+
 async function openCategoryFromPath(){
  routeReady=false;
  routeNotFound=false;
@@ -1324,7 +1413,7 @@ async function openCategoryFromPath(){
   }
   let result;
   try{
-   result=await client.from("pages").select("title").eq("slug",activePageSlug).maybeSingle();
+   result=await client.from("pages").select("title,html").eq("slug",activePageSlug).maybeSingle();
   }catch(error){
    result={data:null,error};
   }
@@ -1342,10 +1431,17 @@ async function openCategoryFromPath(){
   }
 
   document.title=result.data.title+" — DISTENDANG";
+  document.body.classList.remove("server-home");
   document.body.classList.add("category-page");
-  // Banner/hero tetap ditampilkan di halaman kategori.
-  const hero=$("slides")?.closest(".hero");
-  if(hero) hero.style.display="";
+  // Jika admin mengisi HTML khusus, tampilkan konten itu sebagai halaman tersendiri.
+  const custom=$("customPageContent");
+  if(custom && result.data.html && result.data.html.trim()){
+   custom.innerHTML=result.data.html; custom.style.display="block";
+   const appMain=document.querySelector("body > main:not(#notFoundPage)");
+   [...appMain.children].forEach(el=>{if(el!==custom)el.style.display="none";});
+  }else{
+   const hero=$("slides")?.closest(".hero"); if(hero)hero.style.display="";
+  }
   // Animasi logo DISTENDANG berjalan otomatis, lalu peringatan lama tampil.
   playCategoryIntro();
   const categorySection=$("categorySection");
@@ -1363,8 +1459,9 @@ async function openCategoryFromPath(){
   return;
  }
 
- // Beranda utama: tanpa popup peringatan, langsung tampilkan login admin.
+ // Beranda utama adalah panel server, bukan halaman download/kategori.
  document.body.classList.remove("category-page");
+ document.body.classList.add("server-home");
  $("categoryIntro").classList.remove("show");
  $("warningModal").classList.add("hidden");
  if(categoryIntroTimer) clearTimeout(categoryIntroTimer);
@@ -1374,12 +1471,10 @@ async function openCategoryFromPath(){
  const categorySection=$("categorySection");
  if(categorySection) categorySection.style.display="";
  routeReady=true;
- await loadItems();
- await loadLatestVideos();
  const {data:{session}}=await client.auth.getSession();
  updateAdmin(!!session);
  if(session){
-  await loadPages();
+  await showServerPanel();
  }else{
   openModal("loginModal");
  }
