@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -322,7 +323,12 @@ body.server-home .modal#loginModal .dialog{border-color:#7658c9;box-shadow:0 20p
 @keyframes introBrandPulse{from{text-shadow:0 0 8px #8b5cf655;transform:scale(.97)}to{text-shadow:0 0 25px #a78bfa;transform:scale(1.04)}}
 @keyframes introLine{to{width:78%}}
 @keyframes introCaption{to{opacity:1}}
-body.category-page #settingsBtn{display:none!important}
+body.category-page #settingsBtn,
+body.category-page #adminTools,
+body.category-page #categorySection,
+body.category-page #serverPanel{display:none!important}
+body.category-page .admin-only,
+body.category-page .admin-tools{display:none!important}
 
 /* PERINGATAN AWAL DAN CROP FOTO */
 .warning-modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:#000}
@@ -971,17 +977,28 @@ document.addEventListener("keydown",e=>{
 let isAdmin = false;
 
 function updateAdmin(loggedIn){
- isAdmin = !!loggedIn;
+ // Hak kelola hanya berlaku di alamat utama /distendang/.
+ // Halaman kategori selalu menjadi halaman publik, termasuk saat admin
+ // sedang memiliki sesi login di perangkat/browser yang sama.
+ const canManage = !!loggedIn
+  && !activePageSlug
+  && !routeNotFound
+  && !document.body.classList.contains("category-page");
+ isAdmin = canManage;
+
  const adminTools=$("adminTools");
  const settingsBtn=$("settingsBtn");
- if(adminTools) adminTools.classList.toggle("show",isAdmin && !routeNotFound);
- if(settingsBtn) settingsBtn.textContent=isAdmin ? "Keluar Admin" : "⚙ Pengaturan";
+ if(adminTools) adminTools.classList.toggle("show",canManage);
+ if(settingsBtn){
+  settingsBtn.textContent=canManage ? "Keluar Admin" : "⚙ Pengaturan";
+  settingsBtn.style.display=document.body.classList.contains("category-page") ? "none" : "";
+ }
  const categorySection=$("categorySection");
- if(categorySection) categorySection.classList.toggle("show",isAdmin && !activePageSlug && !routeNotFound);
+ if(categorySection) categorySection.classList.toggle("show",canManage);
  if(routeReady && !routeNotFound && $("downloadGrid")){
   loadItems();
   loadLatestVideos();
-  if($("categoryGrid") && isAdmin && !activePageSlug) loadPages();
+  if($("categoryGrid") && canManage) loadPages();
  }
 }
 
@@ -1433,6 +1450,10 @@ async function openCategoryFromPath(){
   document.title=result.data.title+" — DISTENDANG";
   document.body.classList.remove("server-home");
   document.body.classList.add("category-page");
+  // Halaman kategori adalah publik: jangan pernah tampilkan alat admin/edit.
+  updateAdmin(false);
+  $("loginModal")?.classList.remove("show");
+  $("serverPanel")?.style.setProperty("display","none");
   // Jika admin mengisi HTML khusus, tampilkan konten itu sebagai halaman tersendiri.
   const custom=$("customPageContent");
   if(custom && result.data.html && result.data.html.trim()){
