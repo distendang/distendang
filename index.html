@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -309,6 +308,19 @@ body.server-home .modal#loginModal{z-index:200;background:#05060af5}
 body.server-home .modal#loginModal.show{display:flex}
 body.server-home .modal#loginModal .closeModal{display:none}
 body.server-home .modal#loginModal .dialog{border-color:#7658c9;box-shadow:0 20px 80px #000b}
+/* EDITOR FULL PAGE: terpisah dari banner halaman publik */
+#editorWorkspace{display:none;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#1b2140 0%,#090b12 58%);padding:20px 16px 50px}
+body.editor-page>header,body.editor-page>main,body.editor-page>footer,body.editor-page>#serverPanel,body.editor-page>.category-intro,body.editor-page>.warning-modal,body.editor-page>.modal{display:none!important}
+body.editor-page #editorWorkspace{display:block!important}
+.editor-wrap{max-width:1100px;margin:auto}.editor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 0 22px;border-bottom:1px solid #ffffff20}
+.editor-brand{font-size:21px;font-weight:950}.editor-brand span{color:#a78bfa}.editor-sub{font-size:12px;color:#aeb6c9;margin-top:5px}
+.editor-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:16px;margin-top:20px}
+.editor-panel{background:#111522;border:1px solid #303951;border-radius:16px;padding:16px;min-width:0}.editor-panel h2{font-size:17px;margin:0 0 14px}
+.editor-tools{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.editor-tools button{font-size:12px;padding:9px 12px}
+#editorHtml{width:100%;min-height:390px;resize:vertical;padding:13px;border-radius:10px;border:1px solid var(--line);background:#080b13;color:#dce3f8;font:13px/1.6 ui-monospace,monospace;tab-size:2}
+#editorPreview{width:100%;height:440px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.editor-field{display:block;margin:12px 0}.editor-field span{display:block;font-size:12px;color:#aeb6c9;margin-bottom:7px}.editor-field input{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:#080b13;color:#fff}
+@media(max-width:760px){.editor-layout{grid-template-columns:1fr}#editorHtml{min-height:330px}#editorPreview{height:360px}}
 
 /* INTRO KHUSUS HALAMAN KATEGORI */
 .category-intro{position:fixed;inset:0;z-index:110;display:none;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at center,#17142d 0%,#05060b 65%,#000 100%)}
@@ -426,6 +438,23 @@ body.category-page .admin-tools{display:none!important}
   <div class="server-hero"><div class="eyebrow">ADMIN CONTROL CENTER</div><h1>Kelola Website</h1><p>Pilih website untuk membuka editor. Kamu bisa mengubah judul, foto, link, video, dan isi halaman melalui editor HTML.</p></div>
   <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0">Daftar Website</h2><button class="btn" id="serverAddPage">＋ Website Baru</button></div>
   <div class="server-list" id="serverSiteList"><div class="empty">Memuat daftar website...</div></div>
+ </div>
+</section>
+
+<section id="editorWorkspace">
+ <div class="editor-wrap">
+  <div class="editor-top"><div><div class="editor-brand">DIS<span>TENDANG</span> · EDITOR</div><div class="editor-sub" id="editorPageLabel">Editor website</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="editorBack">← Panel Server</button><button class="btn" id="editorSave">Simpan Perubahan</button></div></div>
+  <div class="editor-layout">
+   <section class="editor-panel"><h2>Pengaturan Halaman</h2>
+    <label class="editor-field"><span>Nama website</span><input id="editorTitle" placeholder="Nama website"></label>
+    <label class="editor-field"><span>Alamat halaman</span><input id="editorSlug" disabled></label>
+    <h2 style="margin-top:20px">Konten Website</h2>
+    <div class="editor-tools"><button class="btn ghost" id="insertPhoto">＋ Foto</button><button class="btn ghost" id="insertVideo">＋ Video</button><button class="btn ghost" id="insertLink">＋ Link</button><button class="btn ghost" id="refreshPreview">▶ Preview</button></div>
+    <textarea id="editorHtml" spellcheck="false" placeholder="Tulis atau edit HTML website di sini..."></textarea>
+    <p class="editor-help">Gunakan tombol Foto, Video, dan Link untuk memasukkan elemen ke HTML. Banner utama tidak tampil di editor; banner tetap tampil di halaman publik kategori.</p>
+   </section>
+   <section class="editor-panel"><h2>Pratinjau Konten</h2><iframe id="editorPreview" title="Pratinjau website" sandbox="allow-scripts allow-forms"></iframe></section>
+  </div>
  </div>
 </section>
 
@@ -1391,10 +1420,9 @@ $("serverSiteList").addEventListener("click",async e=>{
  const view=e.target.closest("[data-open-site]");
  if(view){alert("Untuk mengunjungi website publik, gunakan link halaman ini: "+SITE_BASE+encodeURIComponent(view.dataset.openSite)+"/");return;}
  if(!edit)return;
- const {data,error}=await client.from("pages").select("id,slug,title,html").eq("id",edit.dataset.editSite).single();
+ const {data,error}=await client.from("pages").select("slug").eq("id",edit.dataset.editSite).single();
  if(error)return alert("Gagal membuka editor: "+error.message);
- editingPageId=data.id; $("editPageTitle").value=data.title||""; $("editPageSlug").value=data.slug||""; $("pageHtml").value=data.html||"";
- $("pageEditorHeading").textContent="Editor · "+(data.title||data.slug); openModal("pageEditorModal");
+ location.href=SITE_BASE+"?editor="+encodeURIComponent(data.slug);
 });
 $("savePageContent").addEventListener("click",async()=>{
  if(!editingPageId)return;
@@ -1408,11 +1436,46 @@ $("savePageContent").addEventListener("click",async()=>{
 $("serverAddPage").addEventListener("click",()=>{$("pageTitle").value="";$ ("pageSlug").value="";$("pageSlug").dataset.edited="";openModal("pageModal");});
 $("serverLogout").addEventListener("click",async()=>{await client.auth.signOut();document.body.classList.remove("server-home");updateAdmin(false);openModal("loginModal");});
 
+let editorPageId=null;
+function insertEditorSnippet(snippet){
+ const area=$("editorHtml"),start=area.selectionStart,end=area.selectionEnd;
+ area.value=area.value.slice(0,start)+snippet+area.value.slice(end);
+ area.focus();area.selectionStart=area.selectionEnd=start+snippet.length;updateEditorPreview();
+}
+function updateEditorPreview(){const frame=$("editorPreview");if(frame)frame.srcdoc=$("editorHtml")?.value||"";}
+$("insertPhoto").addEventListener("click",()=>{const url=prompt("Masukkan URL foto:");if(url)insertEditorSnippet(`\n<img src="${url.replaceAll('"','&quot;')}" alt="Foto" style="max-width:100%;height:auto;border-radius:12px">\n`);});
+$("insertVideo").addEventListener("click",()=>{const url=prompt("Masukkan URL embed YouTube (contoh: https://www.youtube.com/embed/ID):");if(url)insertEditorSnippet(`\n<div style="position:relative;padding-bottom:56.25%;height:0"><iframe src="${url.replaceAll('"','&quot;')}" title="Video" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe></div>\n`);});
+$("insertLink").addEventListener("click",()=>{const url=prompt("Masukkan alamat link:");if(url){const label=prompt("Teks tombol/link:")||"Buka Link";insertEditorSnippet(`\n<a href="${url.replaceAll('"','&quot;')}" target="_blank" rel="noopener">${label.replaceAll('<','&lt;').replaceAll('>','&gt;')}</a>\n`);}});
+$("refreshPreview").addEventListener("click",updateEditorPreview);
+$("editorHtml").addEventListener("input",updateEditorPreview);
+$("editorBack").addEventListener("click",()=>{location.href=SITE_BASE;});
+$("editorSave").addEventListener("click",async()=>{
+ if(!editorPageId)return;
+ const title=$("editorTitle").value.trim();if(!title)return alert("Nama website tidak boleh kosong.");
+ const btn=$("editorSave");btn.disabled=true;btn.textContent="Menyimpan...";
+ const {error}=await client.from("pages").update({title,html:$("editorHtml").value}).eq("id",editorPageId);
+ btn.disabled=false;btn.textContent="Simpan Perubahan";
+ if(error)return alert("Gagal menyimpan: "+error.message);
+ alert("Perubahan berhasil disimpan. Halaman publik tetap memakai banner.");
+});
+async function openEditorFromQuery(slug){
+ const {data:{session}}=await client.auth.getSession();
+ if(!session){location.replace(SITE_BASE);return true;}
+ const {data,error}=await client.from("pages").select("id,slug,title,html").eq("slug",makeSlug(slug)).maybeSingle();
+ if(error||!data){alert("Website tidak ditemukan atau gagal dimuat.");location.replace(SITE_BASE);return true;}
+ editorPageId=data.id;document.body.classList.remove("server-home","category-page");document.body.classList.add("editor-page");
+ document.title="Editor · "+data.title+" | DISTENDANG";
+ $("editorTitle").value=data.title||"";$("editorSlug").value=data.slug||"";$("editorPageLabel").textContent="Mengedit: "+(data.title||data.slug);
+ $("editorHtml").value=data.html||"";updateEditorPreview();return true;
+}
+
 async function openCategoryFromPath(){
  routeReady=false;
  routeNotFound=false;
  const url=new URL(location.href);
  const base=SITE_BASE;
+ const editorSlug=url.searchParams.get("editor");
+ if(editorSlug){await openEditorFromQuery(editorSlug);routeReady=true;return;}
  let pathname;
  try{ pathname=decodeURIComponent(url.pathname); }
  catch(_){ pathname=url.pathname; }
@@ -1459,7 +1522,9 @@ async function openCategoryFromPath(){
   if(custom && result.data.html && result.data.html.trim()){
    custom.innerHTML=result.data.html; custom.style.display="block";
    const appMain=document.querySelector("body > main:not(#notFoundPage)");
-   [...appMain.children].forEach(el=>{if(el!==custom)el.style.display="none";});
+   const publicHero=$("slides")?.closest(".hero");
+   [...appMain.children].forEach(el=>{if(el!==custom && el!==publicHero)el.style.display="none";});
+   if(publicHero)publicHero.style.display="";
   }else{
    const hero=$("slides")?.closest(".hero"); if(hero)hero.style.display="";
   }
