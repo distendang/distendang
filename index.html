@@ -348,6 +348,9 @@ body.category-page #serverPanel{display:none!important}
 body.category-page .admin-only,
 body.category-page .admin-tools{display:none!important}
 body.category-page.category-edit-mode #editorWorkspace{display:block!important}
+body.category-page.category-edit-mode.category-admin-auth #adminTools.show{display:flex!important}
+body.category-page.category-edit-mode.category-admin-auth #settingsBtn{display:inline-flex!important}
+body.category-page.category-edit-mode .admin-only.show{display:block!important}
 body.category-page.category-edit-mode #editorWorkspace .admin-tools{display:flex!important}
 
 /* PERINGATAN AWAL DAN CROP FOTO */
@@ -854,6 +857,7 @@ const $ = id => document.getElementById(id);
 const grid = $("downloadGrid");
 const SITE_BASE = "/distendang/";
 let activePageSlug = null;
+let activeEditorMode = false;
 let routeReady = false;
 let routeNotFound = false;
 
@@ -1019,21 +1023,27 @@ document.addEventListener("keydown",e=>{
 let isAdmin = false;
 
 function updateAdmin(loggedIn){
- // Hak kelola hanya berlaku di alamat utama /distendang/.
- // Halaman kategori selalu menjadi halaman publik, termasuk saat admin
- // sedang memiliki sesi login di perangkat/browser yang sama.
- const canManage = !!loggedIn
-  && !activePageSlug
+ // Admin boleh mengelola halaman utama server dan halaman kategori
+ // hanya jika masuk melalui tautan editor (?edit=1) dan sesi Supabase valid.
+ // URL kategori publik biasa tidak pernah memperoleh hak edit.
+ const onServerHome = !activePageSlug
   && !routeNotFound
   && !document.body.classList.contains("category-page");
+ const onCategoryEditor = !!activePageSlug
+  && activeEditorMode
+  && document.body.classList.contains("category-page")
+  && document.body.classList.contains("category-edit-mode");
+ const canManage = !!loggedIn && !routeNotFound
+  && (onServerHome || onCategoryEditor);
  isAdmin = canManage;
+ document.body.classList.toggle("category-admin-auth", !!(canManage && onCategoryEditor));
 
  const adminTools=$("adminTools");
  const settingsBtn=$("settingsBtn");
  if(adminTools) adminTools.classList.toggle("show",canManage);
  if(settingsBtn){
   settingsBtn.textContent=canManage ? "Keluar Admin" : "⚙ Pengaturan";
-  settingsBtn.style.display=document.body.classList.contains("category-page") ? "none" : "";
+  settingsBtn.style.display=(document.body.classList.contains("category-page") && !activeEditorMode) ? "none" : "";
  }
  const categorySection=$("categorySection");
  if(categorySection) categorySection.classList.toggle("show",canManage);
@@ -1061,6 +1071,11 @@ $("addScriptBtn").addEventListener("click",()=>{
 });
 
 client.auth.onAuthStateChange((_event,session)=>{
+ if(activeEditorMode && !session && activePageSlug){
+  activeEditorMode=false;
+  location.replace(SITE_BASE+encodeURIComponent(activePageSlug)+"/");
+  return;
+ }
  updateAdmin(!!session);
  if(!activePageSlug && routeReady){
   if(session) showServerPanel();
@@ -1485,13 +1500,20 @@ $("editorSave").addEventListener("click",async()=>{
 async function openCategoryFromPath(){
  routeReady=false;
  routeNotFound=false;
+ activeEditorMode=false;
  const url=new URL(location.href);
  const base=SITE_BASE;
  const editorSlug=url.searchParams.get("editor");
  const editMode=!!editorSlug || url.searchParams.get("edit")==="1";
  if(editMode){
   const {data:{session}}=await client.auth.getSession();
-  if(!session){location.replace(SITE_BASE);return;}
+  if(!session){
+   activeEditorMode=false;
+   location.replace(SITE_BASE);
+   return;
+  }
+  // Sesi login terverifikasi: halaman kategori ini dibuka sebagai admin.
+  activeEditorMode=true;
  }
  let pathname;
  try{ pathname=decodeURIComponent(url.pathname); }
@@ -1556,6 +1578,7 @@ async function openCategoryFromPath(){
    $("warningModal").classList.add("hidden");
    if(categoryIntroTimer)clearTimeout(categoryIntroTimer);
   }else{
+   activeEditorMode=false;
    // Pengunjung umum tidak pernah melihat alat edit, meskipun halaman dibuka pada browser yang pernah login.
    if(editorBox)editorBox.style.display="none";
    if(custom && result.data.html && result.data.html.trim()){
@@ -1578,7 +1601,7 @@ async function openCategoryFromPath(){
   const description=downloadHead?.querySelector("p");
   if(description) description.textContent="Koleksi download dan video khusus "+result.data.title+".";
   routeReady=true;
-  updateAdmin(isAdmin);
+  updateAdmin(activeEditorMode);
   await loadItems();
   await loadLatestVideos();
   return;
